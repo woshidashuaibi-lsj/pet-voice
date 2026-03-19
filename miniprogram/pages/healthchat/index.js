@@ -48,6 +48,11 @@ Page({
       setTimeout(() => {
         this._sendText(`我想了解关于「${topic}」的更多信息，能详细解答吗？`)
       }, 400)
+    } else if (options.question) {
+      const question = decodeURIComponent(options.question)
+      setTimeout(() => {
+        this._sendText(question)
+      }, 400)
     }
   },
 

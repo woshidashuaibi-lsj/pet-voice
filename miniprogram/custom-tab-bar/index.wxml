@@ -9,11 +9,19 @@
     </view>
   </view>
 
-  <!-- 我的 Tab -->
-  <view class="tab-item" bindtap="onTap" data-index="1" data-path="/pages/profile/index">
+  <!-- AI Tab -->
+  <view class="tab-item" bindtap="onTap" data-index="1" data-path="/pages/ai/index">
     <view class="tab-pill {{selected === 1 ? 'pill-active' : ''}}">
-      <text class="icon-emoji {{selected === 1 ? 'emoji-active' : ''}}">🐱</text>
-      <text class="tab-label {{selected === 1 ? 'label-active' : ''}}">我的</text>
+      <text class="icon-emoji {{selected === 1 ? 'emoji-active' : ''}}">🤖</text>
+      <text class="tab-label {{selected === 1 ? 'label-active' : ''}}">AI</text>
+    </view>
+  </view>
+
+  <!-- 我的 Tab -->
+  <view class="tab-item" bindtap="onTap" data-index="2" data-path="/pages/profile/index">
+    <view class="tab-pill {{selected === 2 ? 'pill-active' : ''}}">
+      <text class="icon-emoji {{selected === 2 ? 'emoji-active' : ''}}">🐱</text>
+      <text class="tab-label {{selected === 2 ? 'label-active' : ''}}">我的</text>
     </view>
   </view>
 

@@ -11,7 +11,8 @@
     "pages/training/index",
     "pages/trainingchat/index",
     "pages/guide/index",
-    "pages/petbook/index"
+    "pages/petbook/index",
+    "pages/ai/index"
   ],
   "tabBar": {
     "custom": true,
@@ -23,6 +24,12 @@
       {
         "pagePath": "pages/index/index",
         "text": "首页",
+        "iconPath": "assets/tab/home.png",
+        "selectedIconPath": "assets/tab/home-on.png"
+      },
+      {
+        "pagePath": "pages/ai/index",
+        "text": "AI",
         "iconPath": "assets/tab/home.png",
         "selectedIconPath": "assets/tab/home-on.png"
       },

@@ -44,6 +44,12 @@ Page({
       wx.nextTick(() => {
         this.setData({ inputText: `我想了解「${decoded}」的训练方法` })
       })
+    } else if (options.question) {
+      const question = decodeURIComponent(options.question)
+      wx.nextTick(() => {
+        this.setData({ inputText: question })
+        this._sendText(question)
+      })
     }
   },
 

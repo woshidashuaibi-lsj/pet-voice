@@ -1,7 +1,19 @@
 <!-- pages/index/index.wxml -->
 <view class="page">
+  <!-- 可爱装饰：云朵 -->
+  <text class="cloud-decoration cloud-1">☁️</text>
+  <text class="cloud-decoration cloud-2">☁️</text>
+  <text class="cloud-decoration cloud-3">☁️</text>
+
+  <!-- 可爱装饰：小动物 -->
+  <text class="pet-decoration pet-cat-1">🐱</text>
+  <text class="pet-decoration pet-dog-1">🐕</text>
+  <text class="pet-decoration pet-cat-2">🐱</text>
+  <text class="pet-decoration pet-dog-2">🐕</text>
+
   <!-- 状态栏占位 -->
   <view style="height: {{statusBarHeight}}px;"></view>
+
   <!-- 顶部导航栏 -->
   <view class="nav-bar" style="height: {{navBarHeight}}px;">
     <view class="nav-logo">
@@ -9,72 +21,105 @@
       <text class="nav-title">毛孩子翻译官</text>
     </view>
   </view>
-  <!-- 宠物欢迎语 -->
-  <view class="welcome-row" wx:if="{{petName}}">
-    <view class="welcome-avatar-wrap">
-      <text class="welcome-avatar">{{petType === 'cat' ? '🐱' : '🐕'}}</text>
+
+  <!-- 主内容区 -->
+  <scroll-view scroll-y class="main-scroll">
+    <!-- 宠物欢迎语 -->
+    <view class="welcome-card" wx:if="{{petName}}">
+      <view class="welcome-avatar-wrap">
+        <text class="welcome-avatar">{{petType === 'cat' ? '🐱' : '🐕'}}</text>
+      </view>
+      <view class="welcome-info">
+        <text class="welcome-name">{{petName}}</text>
+        <text class="welcome-sub">在等你翻译 TA 说的话 ✨</text>
+      </view>
+      <text class="welcome-deco">💕</text>
     </view>
-    <view class="welcome-info">
-      <text class="welcome-name">{{petName}}</text>
-      <text class="welcome-sub">在等你翻译 TA 说的话 ✨</text>
+
+    <!-- 无宠物时的引导提示 -->
+    <view class="tip-card" wx:if="{{!petName}}" bindtap="goProfile">
+      <text class="tip-icon">🐾</text>
+      <text class="tip-text">先填写宠物档案，翻译更准确</text>
+      <text class="tip-arrow">→</text>
     </view>
-  </view>
-  <!-- 无宠物时的引导提示 -->
-  <view class="tip-card" wx:if="{{!petName}}" bindtap="goProfile">
-    <text class="tip-icon">🐾</text>
-    <text class="tip-text">先填写宠物档案，翻译更准确</text>
-    <text class="tip-arrow">→</text>
-  </view>
-  <!-- 录音核心区域 -->
-  <view class="record-section">
-    <view class="record-btn {{isRecording ? 'recording' : ''}}" bindtouchstart="onRecordStart" bindtouchend="onRecordEnd" bindtouchcancel="onRecordEnd">
-      <text class="record-icon">🎤</text>
-      <text class="record-text">{{isRecording ? duration + 's  松手翻译' : '按住录音'}}</text>
+
+    <!-- 录音核心区域 -->
+    <view class="record-container">
+      <view class="record-btn {{isRecording ? 'recording' : ''}}" bindtouchstart="onRecordStart" bindtouchend="onRecordEnd" bindtouchcancel="onRecordEnd">
+        <text class="record-icon">🎤</text>
+        <text class="record-text">{{isRecording ? duration + 's' : '按住录音'}}</text>
+      </view>
+      <!-- 录音中波纹动画 -->
+      <view class="ripple-wrap" wx:if="{{isRecording}}">
+        <view class="ripple ripple-1"></view>
+        <view class="ripple ripple-2"></view>
+        <view class="ripple ripple-3"></view>
+      </view>
+      <text class="record-hint">录制 3-15 秒宠物叫声</text>
     </view>
-    <!-- 录音中波纹动画 -->
-    <view class="ripple-wrap" wx:if="{{isRecording}}">
-      <view class="ripple ripple-1"></view>
-      <view class="ripple ripple-2"></view>
+
+    <!-- 功能入口卡片 -->
+    <view class="func-section">
+      <text class="section-title">✨ 探索更多</text>
+
+      <view class="func-grid">
+        <!-- 第一行：百科 + 指南 -->
+        <view class="func-row">
+          <navigator url="/pages/baike/index" class="func-card func-card-blue" hover-class="func-card-hover">
+            <view class="func-card-icon">📖</view>
+            <view class="func-card-info">
+              <text class="func-card-title">百科</text>
+              <text class="func-card-desc">宠物知识库</text>
+            </view>
+          </navigator>
+
+          <navigator url="/pages/guide/index" class="func-card func-card-green" hover-class="func-card-hover">
+            <view class="func-card-icon">📋</view>
+            <view class="func-card-info">
+              <text class="func-card-title">指南</text>
+              <text class="func-card-desc">养护小贴士</text>
+            </view>
+          </navigator>
+        </view>
+
+        <!-- 第二行：健康 + 训练 -->
+        <view class="func-row">
+          <navigator url="/pages/health/index" class="func-card func-card-orange" hover-class="func-card-hover">
+            <view class="func-card-icon">💊</view>
+            <view class="func-card-info">
+              <text class="func-card-title">健康</text>
+              <text class="func-card-desc">AI 问诊</text>
+            </view>
+          </navigator>
+
+          <navigator url="/pages/training/index" class="func-card func-card-purple" hover-class="func-card-hover">
+            <view class="func-card-icon">🎓</view>
+            <view class="func-card-info">
+              <text class="func-card-title">训练</text>
+              <text class="func-card-desc">行为矫正</text>
+            </view>
+          </navigator>
+        </view>
+
+        <!-- 第三行：档案 -->
+        <view class="func-row">
+          <navigator url="/pages/petbook/index" class="func-card func-card-gray" hover-class="func-card-hover">
+            <view class="func-card-icon">📓</view>
+            <view class="func-card-info">
+              <text class="func-card-title">档案</text>
+              <text class="func-card-desc">宠物信息</text>
+            </view>
+          </navigator>
+        </view>
+      </view>
     </view>
-    <text class="record-hint">录制 3-15 秒宠物叫声</text>
-  </view>
-  <!-- 5宫格功能入口（百科替换打卡） -->
-  <view class="func-grid">
-    <navigator url="/pages/baike/index" class="func-item" hover-class="func-hover">
-      <view class="func-icon-wrap func-icon-blue">
-        <text class="func-icon">📖</text>
-      </view>
-      <text class="func-text">百科</text>
-    </navigator>
-    <navigator url="/pages/guide/index" class="func-item" hover-class="func-hover">
-      <view class="func-icon-wrap func-icon-green">
-        <text class="func-icon">📋</text>
-      </view>
-      <text class="func-text">指南</text>
-    </navigator>
-    <navigator url="/pages/health/index" class="func-item" hover-class="func-hover">
-      <view class="func-icon-wrap func-icon-orange">
-        <text class="func-icon">💊</text>
-      </view>
-      <text class="func-text">健康</text>
-    </navigator>
-    <navigator url="/pages/training/index" class="func-item" hover-class="func-hover">
-      <view class="func-icon-wrap func-icon-purple">
-        <text class="func-icon">🎓</text>
-      </view>
-      <text class="func-text">训练</text>
-    </navigator>
-    <navigator url="/pages/petbook/index" class="func-item" hover-class="func-hover">
-      <view class="func-icon-wrap func-icon-gray">
-        <text class="func-icon">📓</text>
-      </view>
-      <text class="func-text">档案</text>
-    </navigator>
-  </view>
-  <!-- 右下角悬浮打卡按钮 -->
-  <!-- <view class="fab-checkin func-locked">
-    <text class="fab-icon">📔</text>
-    <text class="fab-label">打卡</text>
-    <view class="fab-badge">即将上线</view>
-  </view> -->
+
+    <!-- 底部装饰 -->
+    <view class="bottom-decoration">
+      <text class="bottom-paw">🐾</text>
+      <text class="bottom-heart">💕</text>
+    </view>
+
+    <view style="height: 140rpx;"></view>
+  </scroll-view>
 </view>

@@ -30,9 +30,9 @@ Page({
     this.loadPet()
     const ui = app.globalData.userInfo
     if (ui) this.setData({ userInfo: ui })
-    // 同步自定义 tabBar 高亮（我的 index = 1）
+    // 同步自定义 tabBar 高亮（我的 index = 2）
     if (typeof this.getTabBar === 'function' && this.getTabBar()) {
-      this.getTabBar().setSelected(1)
+      this.getTabBar().setSelected(2)
     }
   },
 
