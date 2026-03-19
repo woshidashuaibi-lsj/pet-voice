@@ -1,0 +1,131 @@
+<!-- pages/training/index.wxml -->
+<view class="page">
+  <view style="height: {{statusBarHeight}}px;"></view>
+
+  <!-- 导航栏 -->
+  <view class="nav-bar" style="height: {{navBarHeight}}px;">
+    <navigator open-type="navigateBack" class="nav-back">← 返回</navigator>
+    <text class="nav-title-sm">🎓 宠物训练</text>
+    <view style="width:80rpx;"></view>
+  </view>
+
+  <!-- AI 训练师入口横幅 -->
+  <view class="ask-banner" bindtap="goAskTrainer">
+    <view class="ask-banner-left">
+      <text class="ask-banner-icon">🤖</text>
+      <view>
+        <text class="ask-banner-title">AI 训练师</text>
+        <text class="ask-banner-sub">描述问题，获取专属训练方案</text>
+      </view>
+    </view>
+    <text class="ask-banner-arrow">→</text>
+  </view>
+
+  <!-- 分类 Tab -->
+  <view class="tab-row">
+    <view
+      wx:for="{{tabs}}" wx:key="*this"
+      class="tab-btn {{activeTab === item ? 'tab-active' : ''}}"
+      bindtap="switchTab"
+      data-tab="{{item}}"
+    >{{item}}</view>
+  </view>
+
+  <!-- 课程卡片列表 -->
+  <scroll-view scroll-y class="course-list">
+    <view
+      wx:for="{{filteredList}}" wx:key="_id"
+      class="course-card"
+      bindtap="openDetail"
+      data-id="{{item._id}}"
+    >
+      <!-- 顶部标签行 -->
+      <view class="cc-header">
+        <view class="cc-tag" style="background:{{item.tagColor}}20; color:{{item.tagColor}}">
+          {{item.tag}}
+        </view>
+        <view class="cc-level" style="background:{{item.levelColor}}20; color:{{item.levelColor}}">
+          {{item.level}}
+        </view>
+        <text class="cc-pet">{{item.petLabel}}</text>
+      </view>
+      <!-- 标题 -->
+      <text class="cc-title">{{item.title}}</text>
+      <!-- 摘要 -->
+      <text class="cc-summary">{{item.summary}}</text>
+      <!-- 底部：时长 + 难度 -->
+      <view class="cc-footer">
+        <text class="cc-duration">⏱ {{item.duration}}</text>
+        <view class="cc-stars">
+          <text wx:for="{{[1,2,3]}}" wx:key="*this" class="cc-star {{item.difficulty >= item ? 'star-on' : 'star-off'}}">★</text>
+        </view>
+      </view>
+    </view>
+
+    <view class="empty-wrap" wx:if="{{filteredList.length === 0}}">
+      <text class="empty-icon">🔍</text>
+      <text class="empty-text">暂无相关课程</text>
+    </view>
+  </scroll-view>
+
+  <!-- 课程详情弹层 -->
+  <view class="detail-mask" wx:if="{{showDetail}}" bindtap="closeDetail">
+    <view class="detail-sheet" catchtap="noop">
+      <view class="detail-header">
+        <text class="detail-title">{{currentItem.title}}</text>
+        <view class="detail-close" bindtap="closeDetail">✕</view>
+      </view>
+
+      <scroll-view scroll-y class="detail-body">
+        <!-- 标签 + 元信息 -->
+        <view class="detail-meta-row">
+          <view class="cc-tag" style="background:{{currentItem.tagColor}}20; color:{{currentItem.tagColor}}">
+            {{currentItem.tag}}
+          </view>
+          <view class="cc-level" style="background:{{currentItem.levelColor}}20; color:{{currentItem.levelColor}}">
+            {{currentItem.level}}
+          </view>
+          <text class="detail-pet">{{currentItem.petLabel}}</text>
+        </view>
+
+        <!-- 基本信息 -->
+        <view class="detail-info-bar">
+          <view class="detail-info-item">
+            <text class="dii-label">每日时长</text>
+            <text class="dii-val">{{currentItem.duration}}</text>
+          </view>
+          <view class="detail-info-divider"></view>
+          <view class="detail-info-item">
+            <text class="dii-label">难度</text>
+            <view class="cc-stars">
+              <text wx:for="{{[1,2,3]}}" wx:key="*this" class="cc-star {{currentItem.difficulty >= item ? 'star-on' : 'star-off'}}">★</text>
+            </view>
+          </view>
+        </view>
+
+        <!-- 训练步骤 -->
+        <view class="detail-section">
+          <text class="detail-section-title">📋 训练步骤</text>
+          <view wx:for="{{currentItem.steps}}" wx:key="*this" wx:for-item="s" wx:for-index="i" class="step-item">
+            <view class="step-num">{{i + 1}}</view>
+            <text class="step-text">{{s}}</text>
+          </view>
+        </view>
+
+        <!-- 训练贴士 -->
+        <view class="detail-section" wx:if="{{currentItem.tips && currentItem.tips.length > 0}}">
+          <text class="detail-section-title">💡 训练贴士</text>
+          <view wx:for="{{currentItem.tips}}" wx:key="*this" wx:for-item="t" class="tip-item">
+            <text class="tip-dot">•</text>
+            <text class="tip-text">{{t}}</text>
+          </view>
+        </view>
+
+        <!-- 底部 AI 入口 -->
+        <view class="detail-ask-btn" bindtap="goAskTrainerWithTopic">
+          <text>🤖 遇到问题？让 AI 训练师帮你</text>
+        </view>
+      </scroll-view>
+    </view>
+  </view>
+</view>

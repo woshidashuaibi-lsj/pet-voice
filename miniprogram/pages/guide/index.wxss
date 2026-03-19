@@ -1,0 +1,243 @@
+/* pages/guide/index.wxss */
+
+.page {
+  background: var(--color-bg);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---- 导航栏（复用 health 样式变量）---- */
+.nav-back {
+  font-size: 26rpx;
+  color: var(--color-gray);
+  padding: 10rpx 0;
+  min-width: 80rpx;
+}
+
+.nav-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32rpx;
+  background: var(--color-white);
+  border-bottom: 1rpx solid var(--color-border);
+}
+
+.nav-title-sm {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+/* ---- 顶部横幅 ---- */
+.guide-banner {
+  margin: 20rpx 32rpx 24rpx;
+  background: linear-gradient(135deg, #27AE60, #2ECC71);
+  border-radius: 24rpx;
+  padding: 32rpx 36rpx;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 8rpx 32rpx rgba(39, 174, 96, 0.30);
+}
+
+.guide-banner-left {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+}
+
+.guide-banner-icon {
+  font-size: 56rpx;
+  line-height: 1;
+}
+
+.guide-banner-title {
+  display: block;
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 6rpx;
+}
+
+.guide-banner-sub {
+  display: block;
+  font-size: 22rpx;
+  color: rgba(255,255,255,0.85);
+}
+
+/* ---- 猫狗切换 Tab ---- */
+.tab-row {
+  display: flex;
+  gap: 16rpx;
+  padding: 0 32rpx 24rpx;
+}
+
+.tab-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 16rpx 0;
+  border-radius: 32rpx;
+  font-size: 28rpx;
+  color: var(--color-gray);
+  background: var(--color-white);
+  border: 2rpx solid var(--color-border);
+}
+
+.tab-active {
+  color: #27AE60;
+  background: #F0FBF4;
+  border-color: #27AE60;
+  font-weight: 600;
+}
+
+/* ---- 阶段滚动区 ---- */
+.stage-scroll {
+  flex: 1;
+  padding: 0 32rpx;
+  height: calc(100vh - 460rpx);
+}
+
+/* ---- 阶段 section ---- */
+.stage-section {
+  margin-bottom: 36rpx;
+}
+
+.stage-header {
+  display: flex;
+  align-items: center;
+  gap: 14rpx;
+  margin-bottom: 20rpx;
+  padding-left: 4rpx;
+}
+
+.stage-dot {
+  width: 10rpx;
+  height: 10rpx;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
+.stage-title {
+  font-size: 28rpx;
+  font-weight: 700;
+  letter-spacing: 1rpx;
+}
+
+/* ---- 指南卡片 ---- */
+.guide-card {
+  background: var(--color-white);
+  border-radius: 20rpx;
+  padding: 28rpx 28rpx;
+  margin-bottom: 16rpx;
+  display: flex;
+  align-items: center;
+  gap: 24rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0,0,0,0.05);
+}
+
+.gc-icon-wrap {
+  width: 80rpx;
+  height: 80rpx;
+  background: #F0FBF4;
+  border-radius: 20rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.gc-icon {
+  font-size: 40rpx;
+}
+
+.gc-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 10rpx;
+}
+
+.gc-title {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: var(--color-text);
+  line-height: 1.4;
+}
+
+.gc-arrow {
+  font-size: 22rpx;
+  color: #27AE60;
+  font-weight: 500;
+}
+
+/* ========== 详情弹层 ========== */
+.detail-mask {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 100;
+  display: flex;
+  align-items: flex-end;
+}
+
+.detail-sheet {
+  background: var(--color-white);
+  border-radius: 32rpx 32rpx 0 0;
+  width: 100%;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.detail-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 36rpx 36rpx 24rpx;
+  border-bottom: 1rpx solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.detail-title-row {
+  display: flex;
+  align-items: center;
+  gap: 16rpx;
+  flex: 1;
+  padding-right: 24rpx;
+}
+
+.detail-icon {
+  font-size: 40rpx;
+  flex-shrink: 0;
+}
+
+.detail-title {
+  font-size: 30rpx;
+  font-weight: 700;
+  color: var(--color-text);
+  line-height: 1.4;
+  flex: 1;
+}
+
+.detail-close {
+  font-size: 36rpx;
+  color: var(--color-gray);
+  padding: 0 8rpx;
+  flex-shrink: 0;
+}
+
+.detail-body {
+  flex: 1;
+  padding: 28rpx 36rpx 48rpx;
+}
+
+.detail-content {
+  display: block;
+  font-size: 28rpx;
+  color: var(--color-text);
+  line-height: 1.85;
+  white-space: pre-wrap;
+}

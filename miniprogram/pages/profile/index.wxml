@@ -1,0 +1,191 @@
+<!-- pages/profile/index.wxml -->
+<view class="page">
+  <!-- 状态栏占位 -->
+  <view style="height: {{statusBarHeight}}px;"></view>
+  <!-- 导航栏占位 -->
+  <view style="height: {{navBarHeight}}px;"></view>
+
+  <!-- ===== 顶部用户信息 Header ===== -->
+  <view class="header-bg">
+    <view class="header-user-row">
+      <!-- 头像（已登录后可点击更换）-->
+      <button
+        class="avatar-btn"
+        open-type="chooseAvatar"
+        bindchooseavatar="onChooseAvatar"
+      >
+        <image
+          wx:if="{{userInfo && userInfo.avatarUrl}}"
+          class="user-avatar"
+          src="{{userInfo.avatarUrl}}"
+          mode="aspectFill"
+        />
+        <view wx:else class="user-avatar-placeholder">
+          <text class="avatar-icon">👤</text>
+        </view>
+      </button>
+
+      <!-- 右侧昵称 + 副文本 -->
+      <view class="header-info">
+        <input
+          wx:if="{{userInfo && userInfo.nickName}}"
+          class="nickname-input"
+          type="nickname"
+          value="{{userInfo.nickName}}"
+          bindinput="onNicknameInput"
+          maxlength="20"
+        />
+        <text wx:else class="nickname-unset">微信用户</text>
+        <text class="header-sub">点击头像或名字可修改</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- ===== 内容区 ===== -->
+  <view class="content-wrap">
+
+    <!-- 宠物档案卡片 -->
+    <view class="section-card" wx:if="{{pet}}">
+      <view class="section-header">
+        <text class="section-title">🐾 宠物档案</text>
+        <view class="edit-link" bindtap="openEdit">编辑</view>
+      </view>
+
+      <view class="pet-info-row">
+        <view class="pet-avatar-wrap">
+          <text class="pet-avatar-emoji">{{pet.type === 'cat' ? '🐱' : '🐕'}}</text>
+        </view>
+        <view class="pet-basic">
+          <text class="pet-name">{{pet.name}}</text>
+          <view class="pet-type-badge">{{pet.type === 'cat' ? '🐱 猫咪' : '🐕 狗狗'}}</view>
+        </view>
+      </view>
+
+      <view class="divider"></view>
+
+      <view class="info-grid">
+        <view class="info-cell">
+          <text class="info-cell-label">品种</text>
+          <text class="info-cell-val">{{pet.breed || '未填写'}}</text>
+        </view>
+        <view class="info-cell">
+          <text class="info-cell-label">生日</text>
+          <text class="info-cell-val">{{pet.birthday || '未填写'}}</text>
+        </view>
+        <view class="info-cell">
+          <text class="info-cell-label">体重</text>
+          <text class="info-cell-val">{{pet.weight ? pet.weight + ' kg' : '未填写'}}</text>
+        </view>
+        <view class="info-cell" wx:if="{{petAge}}">
+          <text class="info-cell-label">年龄</text>
+          <text class="info-cell-val age-val">{{petAge}}</text>
+        </view>
+      </view>
+    </view>
+
+    <!-- 未创建宠物档案 -->
+    <view class="section-card empty-pet-card" wx:else>
+      <text class="empty-pet-icon">🐾</text>
+      <text class="empty-pet-tip">还没有添加宠物档案哦</text>
+      <text class="empty-pet-sub">填写档案后，翻译结果会更准确</text>
+      <button class="add-pet-btn" bindtap="openEdit">+ 添加宠物</button>
+    </view>
+
+    <!-- 菜单 -->
+    <view class="section-card menu-card">
+      <navigator url="/pages/privacy/index" class="menu-item" hover-class="menu-hover">
+        <text class="menu-icon">📋</text>
+        <text class="menu-label">隐私政策</text>
+        <text class="menu-arrow">›</text>
+      </navigator>
+    </view>
+
+  </view>
+
+  <!-- ===== 首次登录引导弹层 ===== -->
+  <view class="login-mask" wx:if="{{showLoginGuide}}">
+    <view class="login-sheet" catchtap="noop">
+      <view class="login-paw">🐾</view>
+      <text class="login-title">欢迎来到毛孩子翻译官</text>
+      <text class="login-sub">授权头像和昵称，让 AI 认识你和你的宠物</text>
+
+      <!-- 头像选择按钮（必须用 open-type="chooseAvatar" 才能获取微信头像）-->
+      <button
+        class="login-avatar-btn"
+        open-type="chooseAvatar"
+        bindchooseavatar="onLoginChooseAvatar"
+      >
+        <image
+          wx:if="{{loginTempAvatar}}"
+          class="login-avatar-img"
+          src="{{loginTempAvatar}}"
+          mode="aspectFill"
+        />
+        <view wx:else class="login-avatar-placeholder">
+          <text class="login-avatar-icon">👤</text>
+          <text class="login-avatar-hint">点击获取微信头像</text>
+        </view>
+      </button>
+
+      <!-- 昵称输入（type=nickname 会自动填入微信昵称）-->
+      <view class="login-nickname-wrap">
+        <input
+          class="login-nickname-input"
+          type="nickname"
+          placeholder="点击填写昵称（自动读取微信昵称）"
+          placeholder-class="login-nickname-ph"
+          value="{{loginTempNickName}}"
+          bindinput="onLoginNicknameInput"
+          maxlength="20"
+        />
+      </view>
+
+      <button
+        class="login-confirm-btn {{(loginTempAvatar || loginTempNickName) ? 'active' : ''}}"
+        bindtap="confirmLogin"
+      >完成，进入我的主页 →</button>
+
+      <text class="login-skip" bindtap="skipLogin">暂时跳过</text>
+    </view>
+  </view>
+
+  <!-- ===== 编辑/新增宠物弹窗 ===== -->
+  <view class="modal-mask" wx:if="{{showEdit}}" bindtap="closeEdit"></view>
+  <view class="modal-card" wx:if="{{showEdit}}" catchtap="noop">
+    <view class="modal-handle"></view>
+    <text class="modal-title">{{pet ? '编辑宠物档案' : '添加宠物'}}</text>
+
+    <view class="form-row">
+      <text class="form-label">名字 *</text>
+      <input class="form-input" placeholder="起个可爱的名字" value="{{form.name}}" bindinput="onNameInput" />
+    </view>
+
+    <view class="form-row">
+      <text class="form-label">种类 *</text>
+      <view class="type-row">
+        <view class="type-btn {{form.type === 'cat' ? 'selected' : ''}}" bindtap="setType" data-type="cat">🐱 猫咪</view>
+        <view class="type-btn {{form.type === 'dog' ? 'selected' : ''}}" bindtap="setType" data-type="dog">🐕 狗狗</view>
+      </view>
+    </view>
+
+    <view class="form-row">
+      <text class="form-label">品种</text>
+      <input class="form-input" placeholder="如：英短、柯基" value="{{form.breed}}" bindinput="onBreedInput" />
+    </view>
+
+    <view class="form-row">
+      <text class="form-label">生日</text>
+      <input class="form-input" placeholder="格式：2023-06" value="{{form.birthday}}" bindinput="onBirthdayInput" />
+    </view>
+
+    <view class="form-row">
+      <text class="form-label">体重 (kg)</text>
+      <input class="form-input" placeholder="如：4.5" type="digit" value="{{form.weight}}" bindinput="onWeightInput" />
+    </view>
+
+    <view class="modal-btns">
+      <button class="modal-cancel" bindtap="closeEdit">取消</button>
+      <button class="modal-save" bindtap="savePet">保存</button>
+    </view>
+  </view>
+</view>

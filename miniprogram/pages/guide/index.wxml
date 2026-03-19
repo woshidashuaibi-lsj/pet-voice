@@ -1,0 +1,83 @@
+<!-- pages/guide/index.wxml -->
+<view class="page">
+  <view style="height: {{statusBarHeight}}px;"></view>
+
+  <!-- 导航栏 -->
+  <view class="nav-bar" style="height: {{navBarHeight}}px;">
+    <navigator open-type="navigateBack" class="nav-back">← 返回</navigator>
+    <text class="nav-title-sm">📋 养宠指南</text>
+    <view style="width:80rpx;"></view>
+  </view>
+
+  <!-- 顶部说明横幅 -->
+  <view class="guide-banner">
+    <view class="guide-banner-left">
+      <text class="guide-banner-icon">🐾</text>
+      <view>
+        <text class="guide-banner-title">从零开始养好宠物</text>
+        <text class="guide-banner-sub">从迎接回家到全程陪伴，一步一步来</text>
+      </view>
+    </view>
+  </view>
+
+  <!-- 猫狗切换 Tab -->
+  <view class="tab-row">
+    <view
+      wx:for="{{petTabs}}" wx:key="*this"
+      class="tab-btn {{activePetTab === item ? 'tab-active' : ''}}"
+      bindtap="switchPetTab"
+      data-tab="{{item}}"
+    >
+      <text>{{item === '猫咪' ? '🐱 猫咪' : '🐶 狗狗'}}</text>
+    </view>
+  </view>
+
+  <!-- 生命阶段列表 -->
+  <scroll-view scroll-y class="stage-scroll">
+    <view wx:for="{{stageList}}" wx:key="_id" class="stage-section">
+
+      <!-- 阶段标题 -->
+      <view class="stage-header">
+        <view class="stage-dot" style="background: {{item.stageColor}}"></view>
+        <text class="stage-title" style="color: {{item.stageColor}}">{{item.stage}}</text>
+      </view>
+
+      <!-- 该阶段的文章卡片 -->
+      <view
+        wx:for="{{item.items}}" wx:key="_id" wx:for-item="guide"
+        class="guide-card"
+        bindtap="openDetail"
+        data-stageid="{{item._id}}"
+        data-itemid="{{guide._id}}"
+      >
+        <view class="gc-icon-wrap">
+          <text class="gc-icon">{{guide.icon}}</text>
+        </view>
+        <view class="gc-content">
+          <text class="gc-title">{{guide.title}}</text>
+          <text class="gc-arrow">阅读全文 →</text>
+        </view>
+      </view>
+
+    </view>
+
+    <!-- 底部留白 -->
+    <view style="height: 60rpx;"></view>
+  </scroll-view>
+
+  <!-- 详情弹层 -->
+  <view class="detail-mask" wx:if="{{showDetail}}" bindtap="closeDetail">
+    <view class="detail-sheet" catchtap="noop">
+      <view class="detail-header">
+        <view class="detail-title-row">
+          <text class="detail-icon">{{currentItem.icon}}</text>
+          <text class="detail-title">{{currentItem.title}}</text>
+        </view>
+        <view class="detail-close" bindtap="closeDetail">✕</view>
+      </view>
+      <scroll-view scroll-y class="detail-body">
+        <text class="detail-content">{{currentItem.content}}</text>
+      </scroll-view>
+    </view>
+  </view>
+</view>

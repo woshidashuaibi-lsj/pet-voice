@@ -1,0 +1,242 @@
+/* pages/result/index.wxss */
+
+.page {
+  background: var(--color-bg);
+  min-height: 100vh;
+  padding-bottom: 60rpx;
+}
+
+/* 导航栏分享按钮（覆盖 button 默认样式）*/
+.nav-share-btn {
+  background: none !important;
+  border: none !important;
+  box-shadow: none !important;
+  font-size: 44rpx;
+  padding: 0;
+  line-height: 1;
+  min-width: 0;
+  width: 80rpx;
+  height: 80rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.nav-share-btn::after {
+  border: none;
+}
+
+/* ---- 加载状态 ---- */
+.loading-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 160rpx 0 80rpx;
+}
+
+.loading-circle {
+  width: 80rpx;
+  height: 80rpx;
+  border: 6rpx solid var(--color-border);
+  border-top-color: var(--color-primary);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin-bottom: 32rpx;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.loading-tip {
+  color: var(--color-gray);
+  font-size: 28rpx;
+}
+
+/* ---- 结果内容区 ---- */
+.result-content {
+  padding-top: 8rpx;
+}
+
+/* ---- 主卡片 ---- */
+.result-card {
+  margin: 24rpx 32rpx 20rpx;
+}
+
+.pet-avatar {
+  width: 120rpx;
+  height: 120rpx;
+  background: linear-gradient(145deg, #FFE4C4, #FFD0A0);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 24rpx;
+}
+
+.pet-avatar-emoji {
+  font-size: 64rpx;
+  line-height: 1;
+}
+
+.pet-name-title {
+  display: block;
+  text-align: center;
+  font-size: 32rpx;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 32rpx;
+}
+
+/* ---- 对话气泡 ---- */
+.bubble {
+  background: linear-gradient(135deg, #FFF5E6, #FFE8D6);
+  border-radius: 24rpx;
+  padding: 32rpx;
+  margin-bottom: 28rpx;
+  position: relative;
+}
+
+/* 气泡上方小三角，指向宠物头像 */
+.bubble::before {
+  content: '';
+  position: absolute;
+  top: -18rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  border-left: 18rpx solid transparent;
+  border-right: 18rpx solid transparent;
+  border-bottom: 18rpx solid #FFF5E6;
+}
+
+.bubble-text {
+  display: block;
+  font-size: 32rpx;
+  color: var(--color-text);
+  text-align: center;
+  line-height: 1.7;
+  margin-bottom: 16rpx;
+}
+
+.bubble-conf {
+  display: block;
+  text-align: center;
+  font-size: 22rpx;
+  color: var(--color-gray);
+}
+
+/* ---- 情绪标签 ---- */
+.emotion-badge {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 32rpx;
+  padding: 10rpx 32rpx;
+  border: 2rpx solid;
+  width: fit-content;
+  margin: 0 auto 24rpx;
+}
+
+.emotion-badge-text {
+  font-size: 28rpx;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+/* ---- 建议卡片 ---- */
+.suggestion-box {
+  background: #F0FFF4;
+  border-radius: 16rpx;
+  padding: 24rpx 28rpx;
+  margin-bottom: 16rpx;
+  border-left: 6rpx solid #26DE81;
+}
+
+.sugg-label {
+  display: block;
+  font-size: 24rpx;
+  color: #1DB954;
+  font-weight: 600;
+  margin-bottom: 12rpx;
+}
+
+.sugg-content {
+  display: block;
+  font-size: 28rpx;
+  color: var(--color-text);
+  line-height: 1.6;
+}
+
+/* ---- 健康预警 ---- */
+.alert-box {
+  background: #FFF8E1;
+  border-radius: 16rpx;
+  padding: 24rpx 28rpx;
+  border-left: 6rpx solid #FFC107;
+  margin-top: 4rpx;
+}
+
+.alert-text {
+  font-size: 26rpx;
+  color: #856404;
+  line-height: 1.6;
+}
+
+/* ---- 百科入口卡片 ---- */
+.baike-link-card {
+  margin: 0 32rpx 20rpx;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.baike-link-title {
+  font-size: 30rpx;
+  font-weight: 500;
+  color: var(--color-text);
+}
+
+.baike-link-arrow {
+  font-size: 32rpx;
+  color: var(--color-gray);
+}
+
+/* ---- 操作按钮行 ---- */
+.action-row {
+  display: flex;
+  gap: 20rpx;
+  padding: 0 32rpx;
+  margin-top: 4rpx;
+}
+
+/* 操作按钮基础样式 */
+.action-btn {
+  flex: 1;
+  height: 88rpx;
+  line-height: 88rpx;
+  text-align: center;
+  font-size: 30rpx;
+  font-weight: 500;
+  border-radius: 48rpx;
+  display: block;
+}
+
+/* 主按钮：橙色填充（打卡） */
+.action-btn-primary {
+  background: var(--color-primary);
+  color: #ffffff;
+}
+
+/* 次按钮：白色描边（分享）*/
+.action-btn-secondary {
+  background: var(--color-white) !important;
+  color: var(--color-primary) !important;
+  border: 2rpx solid var(--color-primary) !important;
+  box-shadow: none !important;
+  padding: 0;
+  min-height: 0;
+}
+
+.action-btn-secondary::after {
+  border: none;
+}

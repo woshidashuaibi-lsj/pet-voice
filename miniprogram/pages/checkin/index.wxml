@@ -1,0 +1,64 @@
+<!-- pages/checkin/index.wxml -->
+<view class="page">
+  <!-- 状态栏占位 -->
+  <view style="height: {{statusBarHeight}}px;"></view>
+
+  <!-- 导航 -->
+  <view class="nav-bar" style="height: {{navBarHeight}}px;">
+    <navigator open-type="navigateBack" class="nav-back">← 返回</navigator>
+    <text class="nav-title-sm">📔 今日打卡</text>
+    <view></view>
+  </view>
+
+  <view class="content">
+    <!-- 宠物信息 -->
+    <view class="pet-row">
+      <view class="pet-ava">
+        <text>{{petType === 'cat' ? '🐱' : '🐕'}}</text>
+      </view>
+      <text class="pet-nm">{{petName || '我的宠物'}}</text>
+    </view>
+
+    <!-- 今日已打卡 -->
+    <view class="checked-tip" wx:if="{{todayChecked}}">
+      <text>✅ 今天已经打卡啦，明天再来～</text>
+    </view>
+
+    <!-- 打卡表单 -->
+    <view wx:if="{{!todayChecked}}">
+      <text class="section-label">今天心情怎么样？</text>
+
+      <view class="mood-grid">
+        <view
+          wx:for="{{moods}}"
+          wx:key="key"
+          class="mood-item {{selectedMood === item.key ? 'selected' : ''}}"
+          bindtap="selectMood"
+          data-key="{{item.key}}"
+        >
+          <text class="mood-emoji">{{item.emoji}}</text>
+          <text class="mood-label">{{item.label}}</text>
+        </view>
+      </view>
+
+      <text class="section-label">备注（可选）</text>
+      <view class="note-wrap card">
+        <textarea
+          class="note-input"
+          value="{{note}}"
+          bindinput="onNoteInput"
+          placeholder="今天表现挺好的..."
+          maxlength="200"
+          auto-height
+        />
+      </view>
+
+      <button class="checkin-btn" bindtap="doCheckin">✅ 打卡</button>
+    </view>
+
+    <!-- 连续打卡提示 -->
+    <text class="streak-text" wx:if="{{streakDays > 0}}">
+      已连续打卡 {{streakDays}} 天 🔥
+    </text>
+  </view>
+</view>

@@ -1,0 +1,43 @@
+<!-- pages/privacy/index.wxml -->
+<view class="page">
+  <view class="nav-bar">
+    <navigator open-type="navigateBack" class="nav-back">← 返回</navigator>
+    <text class="nav-title-sm">隐私政策</text>
+    <view></view>
+  </view>
+
+  <scroll-view scroll-y class="content">
+    <text class="title">毛孩子翻译官 隐私政策</text>
+    <text class="date">更新日期：2026年3月</text>
+
+    <text class="heading">一、我们收集哪些信息</text>
+    <text class="body">
+1. 麦克风录音：仅在您主动点击录音时采集，用于分析宠物叫声情绪。分析完成后原始音频文件将在 24 小时内从服务器删除。
+
+2. 宠物档案信息：您自愿填写的宠物名字、种类、品种等，仅用于生成个性化解读内容。
+
+3. 打卡记录：您主动记录的宠物每日情绪，存储于您的账号下，仅您本人可见。
+    </text>
+
+    <text class="heading">二、我们如何使用信息</text>
+    <text class="body">
+· 音频数据：发送至 AI 接口进行情绪分析，不作其他用途。
+· 宠物信息：仅用于本产品内的个性化展示，不向任何第三方共享或出售。
+    </text>
+
+    <text class="heading">三、数据安全</text>
+    <text class="body">
+· 所有数据通过 HTTPS 加密传输。
+· 音频文件分析后自动删除，不长期保存。
+· 基于微信云开发基础设施，数据存储于腾讯云。
+    </text>
+
+    <text class="heading">四、您的权利</text>
+    <text class="body">
+您可以随时在「档案」页删除宠物信息，或联系我们删除全部数据。
+    </text>
+
+    <text class="heading">五、联系我们</text>
+    <text class="body">如有隐私相关问题，请发送邮件至：petvoice@example.com</text>
+  </scroll-view>
+</view>

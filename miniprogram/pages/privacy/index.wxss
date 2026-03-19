@@ -1,0 +1,45 @@
+/* pages/privacy/index.wxss */
+
+.page {
+  background: var(--color-bg);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.content {
+  flex: 1;
+  padding: 32rpx;
+  height: calc(100vh - 88rpx);
+}
+
+.title {
+  display: block;
+  font-size: 36rpx;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 12rpx;
+}
+
+.date {
+  display: block;
+  font-size: 24rpx;
+  color: var(--color-gray);
+  margin-bottom: 40rpx;
+}
+
+.heading {
+  display: block;
+  font-size: 30rpx;
+  font-weight: 600;
+  color: var(--color-text);
+  margin: 36rpx 0 16rpx;
+}
+
+.body {
+  display: block;
+  font-size: 26rpx;
+  color: #555;
+  line-height: 1.8;
+  white-space: pre-wrap;
+}

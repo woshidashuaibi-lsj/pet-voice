@@ -1,0 +1,64 @@
+<!-- pages/result/index.wxml -->
+<view class="page">
+  <!-- 状态栏占位（适配刘海屏/灵动岛）-->
+  <view style="height: {{statusBarHeight}}px;"></view>
+
+  <!-- 导航栏 -->
+  <view class="nav-bar" style="height: {{navBarHeight}}px;">
+    <navigator open-type="navigateBack" class="nav-back">← 返回</navigator>
+    <text class="nav-title-sm">解读结果</text>
+    <button class="nav-share-btn" open-type="share">📤</button>
+  </view>
+
+  <!-- 加载中状态 -->
+  <view class="loading-wrap" wx:if="{{loading}}">
+    <view class="loading-circle"></view>
+    <text class="loading-tip">🐾 正在翻译中，稍等一下...</text>
+  </view>
+
+  <!-- 结果内容 -->
+  <view wx:if="{{!loading && result}}" class="result-content">
+    <!-- 主卡片 -->
+    <view class="result-card card">
+      <!-- 宠物头像 -->
+      <view class="pet-avatar">
+        <text class="pet-avatar-emoji">{{result.petType === 'cat' ? '🐱' : '🐕'}}</text>
+      </view>
+      <text class="pet-name-title">{{result.petName}}想说：</text>
+
+      <!-- 对话气泡 -->
+      <view class="bubble">
+        <text class="bubble-text">"{{result.description}}"</text>
+        <text class="bubble-conf">置信度：{{result.confidence}}%</text>
+      </view>
+
+      <!-- 情绪标签 -->
+      <view class="emotion-badge" style="background:{{result.emotionColor}}22; border-color:{{result.emotionColor}}66">
+        <text class="emotion-badge-text">{{result.emotionEmoji}} {{result.emotionLabel}}</text>
+      </view>
+
+      <!-- 给主人的建议 -->
+      <view class="suggestion-box" wx:if="{{result.suggestion}}">
+        <text class="sugg-label">💡 建议</text>
+        <text class="sugg-content">{{result.suggestion}}</text>
+      </view>
+
+      <!-- 健康预警 -->
+      <view class="alert-box" wx:if="{{result.healthAlert}}">
+        <text class="alert-text">⚠️ 检测到异常叫声，建议关注 TA 的身体状况</text>
+      </view>
+    </view>
+
+    <!-- 相关百科入口 -->
+    <navigator url="/pages/baike/index" class="baike-link-card card">
+      <text class="baike-link-title">📚 相关百科</text>
+      <text class="baike-link-arrow">→</text>
+    </navigator>
+
+    <!-- 操作按钮行 -->
+    <view class="action-row">
+      <navigator url="/pages/checkin/index" class="action-btn action-btn-primary">❤️ 打卡今天</navigator>
+      <button class="action-btn action-btn-secondary" open-type="share">📤 分享</button>
+    </view>
+  </view>
+</view>

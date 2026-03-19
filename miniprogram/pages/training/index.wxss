@@ -1,0 +1,348 @@
+/* pages/training/index.wxss */
+
+.page {
+  background: var(--color-bg);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ---- AI 训练师横幅 ---- */
+.ask-banner {
+  margin: 20rpx 32rpx 24rpx;
+  background: linear-gradient(135deg, #9B59B6, #E74C3C);
+  border-radius: 24rpx;
+  padding: 32rpx 36rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: 0 8rpx 32rpx rgba(155, 89, 182, 0.35);
+}
+
+.ask-banner-left {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+}
+
+.ask-banner-icon {
+  font-size: 56rpx;
+  line-height: 1;
+}
+
+.ask-banner-title {
+  display: block;
+  font-size: 32rpx;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 6rpx;
+}
+
+.ask-banner-sub {
+  display: block;
+  font-size: 22rpx;
+  color: rgba(255,255,255,0.85);
+}
+
+.ask-banner-arrow {
+  font-size: 36rpx;
+  color: #fff;
+  font-weight: 700;
+}
+
+/* ---- 分类 Tab ---- */
+.tab-row {
+  display: flex;
+  gap: 16rpx;
+  padding: 0 32rpx 24rpx;
+}
+
+.tab-btn {
+  padding: 12rpx 32rpx;
+  border-radius: 32rpx;
+  font-size: 26rpx;
+  color: var(--color-gray);
+  background: var(--color-white);
+  border: 2rpx solid var(--color-border);
+}
+
+.tab-active {
+  color: var(--color-primary);
+  background: var(--color-primary-light);
+  border-color: var(--color-primary);
+  font-weight: 600;
+}
+
+/* ---- 课程列表 ---- */
+.course-list {
+  flex: 1;
+  padding: 0 32rpx 40rpx;
+  height: calc(100vh - 480rpx);
+}
+
+.course-card {
+  background: var(--color-white);
+  border-radius: 20rpx;
+  padding: 28rpx 32rpx;
+  margin-bottom: 20rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0,0,0,0.05);
+}
+
+.cc-header {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  margin-bottom: 16rpx;
+}
+
+.cc-tag {
+  font-size: 22rpx;
+  font-weight: 600;
+  padding: 6rpx 18rpx;
+  border-radius: 20rpx;
+}
+
+.cc-level {
+  font-size: 22rpx;
+  font-weight: 600;
+  padding: 6rpx 18rpx;
+  border-radius: 20rpx;
+}
+
+.cc-pet {
+  font-size: 22rpx;
+  color: var(--color-gray);
+  margin-left: auto;
+}
+
+.cc-title {
+  display: block;
+  font-size: 30rpx;
+  font-weight: 600;
+  color: var(--color-text);
+  margin-bottom: 12rpx;
+  line-height: 1.4;
+}
+
+.cc-summary {
+  display: block;
+  font-size: 26rpx;
+  color: var(--color-gray);
+  line-height: 1.6;
+  margin-bottom: 16rpx;
+}
+
+.cc-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cc-duration {
+  font-size: 24rpx;
+  color: var(--color-gray);
+}
+
+.cc-stars {
+  display: flex;
+  gap: 4rpx;
+}
+
+.cc-star {
+  font-size: 24rpx;
+}
+
+.star-on { color: #F39C12; }
+.star-off { color: #E0E0E0; }
+
+/* ---- 空状态 ---- */
+.empty-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 80rpx 0;
+}
+
+.empty-icon {
+  font-size: 80rpx;
+  margin-bottom: 20rpx;
+}
+
+.empty-text {
+  font-size: 28rpx;
+  color: var(--color-gray);
+}
+
+/* ========== 详情弹层 ========== */
+.detail-mask {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(0,0,0,0.5);
+  z-index: 100;
+  display: flex;
+  align-items: flex-end;
+}
+
+.detail-sheet {
+  background: var(--color-white);
+  border-radius: 32rpx 32rpx 0 0;
+  width: 100%;
+  max-height: 85vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.detail-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 36rpx 36rpx 24rpx;
+  border-bottom: 1rpx solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.detail-title {
+  font-size: 32rpx;
+  font-weight: 700;
+  color: var(--color-text);
+  flex: 1;
+  line-height: 1.4;
+  padding-right: 24rpx;
+}
+
+.detail-close {
+  font-size: 36rpx;
+  color: var(--color-gray);
+  padding: 0 8rpx;
+  flex-shrink: 0;
+}
+
+.detail-body {
+  flex: 1;
+  padding: 28rpx 36rpx 40rpx;
+}
+
+.detail-meta-row {
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  margin-bottom: 24rpx;
+}
+
+.detail-pet {
+  font-size: 24rpx;
+  color: var(--color-gray);
+  margin-left: auto;
+}
+
+/* 基本信息条 */
+.detail-info-bar {
+  background: #F8F9FA;
+  border-radius: 16rpx;
+  padding: 20rpx 28rpx;
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  margin-bottom: 32rpx;
+}
+
+.detail-info-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8rpx;
+}
+
+.dii-label {
+  font-size: 22rpx;
+  color: var(--color-gray);
+}
+
+.dii-val {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: var(--color-text);
+}
+
+.detail-info-divider {
+  width: 1rpx;
+  height: 60rpx;
+  background: var(--color-border);
+}
+
+/* 详情区块 */
+.detail-section {
+  margin-bottom: 32rpx;
+}
+
+.detail-section-title {
+  display: block;
+  font-size: 28rpx;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 20rpx;
+}
+
+/* 训练步骤 */
+.step-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 20rpx;
+  margin-bottom: 24rpx;
+  padding: 24rpx;
+  background: #F8F9FA;
+  border-radius: 16rpx;
+}
+
+.step-num {
+  width: 48rpx;
+  height: 48rpx;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #9B59B6, #E74C3C);
+  color: #fff;
+  font-size: 24rpx;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.step-text {
+  flex: 1;
+  font-size: 26rpx;
+  line-height: 1.7;
+  color: var(--color-text);
+}
+
+/* 训练贴士 */
+.tip-item {
+  display: flex;
+  align-items: flex-start;
+  margin-bottom: 16rpx;
+}
+
+.tip-dot {
+  color: var(--color-primary);
+  margin-right: 12rpx;
+  font-size: 28rpx;
+}
+
+.tip-text {
+  flex: 1;
+  font-size: 26rpx;
+  line-height: 1.6;
+  color: var(--color-gray);
+}
+
+/* 底部 AI 入口按钮 */
+.detail-ask-btn {
+  background: linear-gradient(135deg, #9B59B6, #E74C3C);
+  border-radius: 48rpx;
+  padding: 28rpx;
+  text-align: center;
+  color: #fff;
+  font-size: 28rpx;
+  font-weight: 600;
+  margin-bottom: 20rpx;
+}

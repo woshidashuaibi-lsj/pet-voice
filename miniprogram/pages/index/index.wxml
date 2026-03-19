@@ -1,0 +1,79 @@
+<!-- pages/index/index.wxml -->
+<view class="page">
+
+  <!-- 状态栏占位（适配刘海屏/灵动岛）-->
+  <view style="height: {{statusBarHeight}}px;"></view>
+
+  <!-- 顶部导航栏 -->
+  <view class="nav-bar" style="height: {{navBarHeight}}px;">
+    <text class="nav-title">🐾 毛孩子翻译官</text>
+    <navigator url="/pages/profile/index" class="nav-setting" hover-class="none">⚙️</navigator>
+  </view>
+
+  <!-- 宠物欢迎语（有档案时显示）-->
+  <view class="welcome-row" wx:if="{{petName}}">
+    <text class="welcome-avatar">{{petType === 'cat' ? '🐱' : '🐕'}}</text>
+    <view class="welcome-info">
+      <text class="welcome-name">{{petName}}</text>
+      <text class="welcome-sub">在等你翻译 TA 说的话</text>
+    </view>
+  </view>
+
+  <!-- 录音核心区域 -->
+  <view class="record-section">
+    <view
+      class="record-btn {{isRecording ? 'recording' : ''}}"
+      bindtouchstart="onRecordStart"
+      bindtouchend="onRecordEnd"
+      bindtouchcancel="onRecordEnd"
+    >
+      <text class="record-icon">🎤</text>
+      <text class="record-text">{{isRecording ? duration + 's  松手翻译' : '按住录音'}}</text>
+    </view>
+
+    <!-- 录音中波纹动画 -->
+    <view class="ripple-wrap" wx:if="{{isRecording}}">
+      <view class="ripple ripple-1"></view>
+      <view class="ripple ripple-2"></view>
+    </view>
+
+    <text class="record-hint">录制 3-15 秒宠物叫声</text>
+  </view>
+
+  <!-- 6宫格功能入口 -->
+  <view class="func-grid">
+    <navigator url="/pages/baike/index" class="func-item" hover-class="func-hover">
+      <text class="func-icon">📖</text>
+      <text class="func-text">百科</text>
+    </navigator>
+    <view class="func-item func-locked">
+      <text class="func-icon">📔</text>
+      <text class="func-text">打卡</text>
+      <text class="func-soon">即将上线</text>
+    </view>
+    <navigator url="/pages/profile/index" class="func-item" hover-class="func-hover">
+      <text class="func-icon">🏠</text>
+      <text class="func-text">档案</text>
+    </navigator>
+    <navigator url="/pages/guide/index" class="func-item" hover-class="func-hover">
+      <text class="func-icon">📋</text>
+      <text class="func-text">指南</text>
+    </navigator>
+    <navigator url="/pages/health/index" class="func-item" hover-class="func-hover">
+      <text class="func-icon">💊</text>
+      <text class="func-text">健康</text>
+    </navigator>
+    <navigator url="/pages/training/index" class="func-item" hover-class="func-hover">
+      <text class="func-icon">🎓</text>
+      <text class="func-text">训练</text>
+    </navigator>
+  </view>
+
+  <!-- 未创建档案引导提示 -->
+  <view class="tip-card" wx:if="{{!petName}}" bindtap="goProfile">
+    <text class="tip-icon">🐾</text>
+    <text class="tip-text">先填写宠物档案，翻译更准确</text>
+    <text class="tip-arrow">→</text>
+  </view>
+
+</view>

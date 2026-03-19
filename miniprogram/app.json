@@ -1,0 +1,55 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/result/index",
+    "pages/checkin/index",
+    "pages/baike/index",
+    "pages/profile/index",
+    "pages/privacy/index",
+    "pages/health/index",
+    "pages/healthchat/index",
+    "pages/training/index",
+    "pages/trainingchat/index",
+    "pages/guide/index"
+  ],
+  "tabBar": {
+    "color": "#999999",
+    "selectedColor": "#FF9F43",
+    "backgroundColor": "#ffffff",
+    "borderStyle": "white",
+    "list": [
+      {
+        "pagePath": "pages/index/index",
+        "text": "首页",
+        "iconPath": "assets/tab/home.png",
+        "selectedIconPath": "assets/tab/home-on.png"
+      },
+      {
+        "pagePath": "pages/baike/index",
+        "text": "百科",
+        "iconPath": "assets/tab/book.png",
+        "selectedIconPath": "assets/tab/book-on.png"
+      },
+      {
+        "pagePath": "pages/profile/index",
+        "text": "我的",
+        "iconPath": "assets/tab/user.png",
+        "selectedIconPath": "assets/tab/user-on.png"
+      }
+    ]
+  },
+  "window": {
+    "backgroundTextStyle": "light",
+    "navigationBarBackgroundColor": "#FFF9F0",
+    "navigationBarTitleText": "毛孩子翻译官",
+    "navigationBarTextStyle": "black",
+    "backgroundColor": "#FFF9F0"
+  },
+  "permission": {
+    "scope.record": {
+      "desc": "用于录制宠物叫声，进行情绪分析"
+    }
+  },
+  "sitemapLocation": "sitemap.json",
+  "lazyCodeLoading": "requiredComponents"
+}

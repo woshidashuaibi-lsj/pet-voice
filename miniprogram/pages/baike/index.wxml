@@ -1,0 +1,57 @@
+<!-- pages/baike/index.wxml -->
+<view class="page">
+  <!-- 状态栏占位 -->
+  <view style="height: {{statusBarHeight}}px;"></view>
+
+  <!-- 导航标题 -->
+  <view class="nav-bar" style="height: {{navBarHeight}}px;">
+    <text class="nav-title">📖 宠物百科</text>
+    <view></view>
+  </view>
+
+  <!-- 搜索栏 -->
+  <view class="search-wrap">
+    <input
+      class="search-input"
+      placeholder="🔍 搜索行为..."
+      bindinput="onSearch"
+      confirm-type="search"
+    />
+  </view>
+
+  <!-- 分类 Tab -->
+  <view class="tab-row">
+    <view
+      wx:for="{{tabs}}"
+      wx:key="*this"
+      class="tab-btn {{activeTab === item ? 'active' : ''}}"
+      bindtap="switchTab"
+      data-tab="{{item}}"
+    >{{item}}</view>
+  </view>
+
+  <!-- 百科列表 -->
+  <scroll-view scroll-y class="baike-list">
+    <view wx:if="{{filteredList.length === 0}}" class="empty-wrap">
+      <text class="empty-text">暂无相关内容</text>
+    </view>
+    <view
+      wx:for="{{filteredList}}"
+      wx:key="_id"
+      class="baike-card card"
+    >
+      <view class="baike-row">
+        <text class="baike-title">{{item.title}}</text>
+      </view>
+      <text class="baike-desc">{{item.desc}}</text>
+      <view class="tag-row">
+        <text
+          wx:for="{{item.tags}}"
+          wx:key="*this"
+          wx:for-item="tag"
+          class="tag"
+        >#{{tag}}</text>
+      </view>
+    </view>
+  </scroll-view>
+</view>
