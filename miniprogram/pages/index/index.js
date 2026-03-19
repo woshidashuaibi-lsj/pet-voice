@@ -8,7 +8,6 @@ Page({
     duration:    0,
     petName:     '',
     petType:     'cat',
-    todayMood:   '',
     statusBarHeight: 0,
     navBarHeight:    44,
   },
@@ -37,9 +36,12 @@ Page({
   },
 
   onShow() {
-    // 每次回到首页时刷新宠物信息和今日心情
+    // 每次回到首页时刷新宠物信息
     this.loadPetInfo()
-    this.loadTodayMood()
+    // 同步自定义 tabBar 高亮（首页 index = 0）
+    if (typeof this.getTabBar === 'function' && this.getTabBar()) {
+      this.getTabBar().setSelected(0)
+    }
   },
 
   // 从云数据库加载宠物档案
@@ -51,18 +53,6 @@ Page({
     } else {
       this.setData({ petName: '', petType: 'cat' })
     }
-  },
-
-  // 从云数据库加载今日打卡心情
-  async loadTodayMood() {
-    const db = wx.cloud.database()
-    const today = new Date().toISOString().slice(0, 10)
-    const res = await db.collection('checkins')
-      .where({ date: today })
-      .limit(1)
-      .get()
-      .catch(() => ({ data: [] }))
-    this.setData({ todayMood: res.data[0] ? res.data[0].moodLabel : '' })
   },
 
   // 跳转宠物档案页

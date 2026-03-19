@@ -7,6 +7,7 @@ Page({
     pet: null,
     petAge: '',
     showEdit: false,
+    showEditProfile: false,   // 修改昵称/头像弹层
     form: { name: '', type: 'cat', breed: '', birthday: '', weight: '' },
     statusBarHeight: 0,
     navBarHeight: 44,
@@ -29,6 +30,10 @@ Page({
     this.loadPet()
     const ui = app.globalData.userInfo
     if (ui) this.setData({ userInfo: ui })
+    // 同步自定义 tabBar 高亮（我的 index = 1）
+    if (typeof this.getTabBar === 'function' && this.getTabBar()) {
+      this.getTabBar().setSelected(1)
+    }
   },
 
   // 初始化用户信息：有缓存直接用，没有则弹出引导
@@ -38,7 +43,6 @@ Page({
       app.globalData.userInfo = cached
       this.setData({ userInfo: cached })
     } else {
-      // 首次进入，弹出登录引导
       this.setData({ showLoginGuide: true })
     }
   },
@@ -56,7 +60,6 @@ Page({
   // ---- 登录引导弹层：点击「完成」----
   confirmLogin() {
     const { loginTempAvatar, loginTempNickName } = this.data
-    // 至少要有头像或昵称之一
     if (!loginTempAvatar && !loginTempNickName.trim()) {
       wx.showToast({ title: '请先选择头像或填写昵称', icon: 'none' })
       return
@@ -78,14 +81,23 @@ Page({
 
   // ---- 跳过登录 ----
   skipLogin() {
-    // 跳过时设置一个默认用户名，以后还能在主页更新
     const userInfo = { avatarUrl: '', nickName: '宠物主人' }
     wx.setStorageSync('userInfo', userInfo)
     app.globalData.userInfo = userInfo
     this.setData({ userInfo, showLoginGuide: false })
   },
 
-  // ---- 主页头像更换（登录后点击更换）----
+  // ---- 打开修改资料弹层 ----
+  onEditProfile() {
+    this.setData({ showEditProfile: true })
+  },
+
+  // ---- 关闭修改资料弹层 ----
+  closeEditProfile() {
+    this.setData({ showEditProfile: false })
+  },
+
+  // ---- 修改资料弹层：换头像 ----
   onChooseAvatar(e) {
     const avatarUrl = e.detail.avatarUrl
     const updated = { ...this.data.userInfo, avatarUrl }
@@ -94,7 +106,7 @@ Page({
     this.setData({ userInfo: updated })
   },
 
-  // ---- 主页昵称修改 ----
+  // ---- 修改资料弹层：改昵称 ----
   onNicknameInput(e) {
     const nickName = e.detail.value
     const updated = { ...this.data.userInfo, nickName }

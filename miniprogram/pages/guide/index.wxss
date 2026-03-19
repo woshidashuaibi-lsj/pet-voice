@@ -2,115 +2,81 @@
 
 .page {
   background: var(--color-bg);
-  min-height: 100vh;
+  height: 100vh;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
 }
 
-/* ---- 导航栏（复用 health 样式变量）---- */
-.nav-back {
-  font-size: 26rpx;
-  color: var(--color-gray);
-  padding: 10rpx 0;
-  min-width: 80rpx;
-}
-
+/* ---- 导航栏（与百科一致的暖色风格）---- */
 .nav-bar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 32rpx;
-  background: var(--color-white);
+  padding: 0 28rpx;
+  background: var(--color-bg);
   border-bottom: 1rpx solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.nav-back {
+  font-size: 28rpx;
+  color: var(--color-primary);
+  padding: 10rpx 0;
+  min-width: 100rpx;
+  font-weight: 500;
 }
 
 .nav-title-sm {
-  font-size: 30rpx;
+  font-size: 34rpx;
   font-weight: 700;
   color: var(--color-text);
+  text-align: center;
+  flex: 1;
 }
 
-/* ---- 顶部横幅 ---- */
-.guide-banner {
-  margin: 20rpx 32rpx 24rpx;
-  background: linear-gradient(135deg, #27AE60, #2ECC71);
-  border-radius: 24rpx;
-  padding: 32rpx 36rpx;
-  display: flex;
-  align-items: center;
-  box-shadow: 0 8rpx 32rpx rgba(39, 174, 96, 0.30);
-}
-
-.guide-banner-left {
-  display: flex;
-  align-items: center;
-  gap: 20rpx;
-}
-
-.guide-banner-icon {
-  font-size: 56rpx;
-  line-height: 1;
-}
-
-.guide-banner-title {
-  display: block;
-  font-size: 32rpx;
-  font-weight: 700;
-  color: #fff;
-  margin-bottom: 6rpx;
-}
-
-.guide-banner-sub {
-  display: block;
-  font-size: 22rpx;
-  color: rgba(255,255,255,0.85);
-}
-
-/* ---- 猫狗切换 Tab ---- */
+/* ---- 猫狗切换 Tab（与百科 Tab 保持一致）---- */
 .tab-row {
   display: flex;
+  justify-content: center;
   gap: 16rpx;
-  padding: 0 32rpx 24rpx;
+  padding: 20rpx 28rpx 16rpx;
+  flex-shrink: 0;
 }
 
 .tab-btn {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 16rpx 0;
-  border-radius: 32rpx;
+  padding: 12rpx 48rpx;
+  border-radius: 40rpx;
   font-size: 28rpx;
   color: var(--color-gray);
   background: var(--color-white);
   border: 2rpx solid var(--color-border);
+  font-weight: 500;
 }
 
 .tab-active {
-  color: #27AE60;
-  background: #F0FBF4;
-  border-color: #27AE60;
+  background: var(--color-primary);
+  color: #fff;
+  border-color: var(--color-primary);
   font-weight: 600;
 }
 
 /* ---- 阶段滚动区 ---- */
 .stage-scroll {
   flex: 1;
-  padding: 0 32rpx;
-  height: calc(100vh - 460rpx);
+  height: 0;
 }
 
 /* ---- 阶段 section ---- */
 .stage-section {
-  margin-bottom: 36rpx;
+  margin-bottom: 8rpx;
 }
 
 .stage-header {
   display: flex;
   align-items: center;
-  gap: 14rpx;
-  margin-bottom: 20rpx;
-  padding-left: 4rpx;
+  gap: 12rpx;
+  padding: 24rpx 28rpx 12rpx;
 }
 
 .stage-dot {
@@ -121,27 +87,32 @@
 }
 
 .stage-title {
-  font-size: 28rpx;
+  font-size: 24rpx;
   font-weight: 700;
   letter-spacing: 1rpx;
+  text-transform: uppercase;
 }
 
-/* ---- 指南卡片 ---- */
+/* ---- 指南卡片（与百科卡片风格一致）---- */
 .guide-card {
   background: var(--color-white);
   border-radius: 20rpx;
-  padding: 28rpx 28rpx;
-  margin-bottom: 16rpx;
+  padding: 28rpx 32rpx;
+  margin: 0 28rpx 16rpx;
   display: flex;
   align-items: center;
   gap: 24rpx;
   box-shadow: 0 4rpx 16rpx rgba(0,0,0,0.05);
 }
 
+.guide-card:active {
+  opacity: 0.85;
+}
+
 .gc-icon-wrap {
   width: 80rpx;
   height: 80rpx;
-  background: #F0FBF4;
+  background: var(--color-primary-light);
   border-radius: 20rpx;
   display: flex;
   align-items: center;
@@ -150,7 +121,7 @@
 }
 
 .gc-icon {
-  font-size: 40rpx;
+  font-size: 42rpx;
 }
 
 .gc-content {
@@ -158,27 +129,46 @@
   display: flex;
   flex-direction: column;
   gap: 10rpx;
+  min-width: 0;
 }
 
 .gc-title {
-  font-size: 28rpx;
-  font-weight: 600;
+  font-size: 30rpx;
+  font-weight: 700;
   color: var(--color-text);
   line-height: 1.4;
 }
 
+.gc-footer {
+  display: flex;
+  align-items: center;
+  gap: 4rpx;
+}
+
 .gc-arrow {
-  font-size: 22rpx;
-  color: #27AE60;
+  font-size: 24rpx;
+  color: var(--color-primary);
   font-weight: 500;
+}
+
+.gc-chevron {
+  font-size: 28rpx;
+  color: var(--color-primary);
+  font-weight: 400;
+  line-height: 1;
+}
+
+/* ---- 底部底部留白 ---- */
+.list-bottom {
+  height: 40rpx;
 }
 
 /* ========== 详情弹层 ========== */
 .detail-mask {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.5);
-  z-index: 100;
+  background: rgba(0,0,0,0.50);
+  z-index: 9999;
   display: flex;
   align-items: flex-end;
 }
@@ -187,18 +177,33 @@
   background: var(--color-white);
   border-radius: 32rpx 32rpx 0 0;
   width: 100%;
-  max-height: 85vh;
+  max-height: 88vh;
   display: flex;
   flex-direction: column;
+  box-shadow: 0 -4rpx 32rpx rgba(0, 0, 0, 0.12);
 }
 
 .detail-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  padding: 36rpx 36rpx 24rpx;
+  padding: 36rpx 32rpx 24rpx;
   border-bottom: 1rpx solid var(--color-border);
   flex-shrink: 0;
+  position: relative;
+}
+
+/* 顶部拖动指示条 */
+.detail-header::before {
+  content: '';
+  position: absolute;
+  top: 16rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 64rpx;
+  height: 6rpx;
+  background: rgba(0, 0, 0, 0.08);
+  border-radius: 6rpx;
 }
 
 .detail-title-row {
@@ -206,7 +211,7 @@
   align-items: center;
   gap: 16rpx;
   flex: 1;
-  padding-right: 24rpx;
+  padding-right: 20rpx;
 }
 
 .detail-icon {
@@ -215,7 +220,7 @@
 }
 
 .detail-title {
-  font-size: 30rpx;
+  font-size: 32rpx;
   font-weight: 700;
   color: var(--color-text);
   line-height: 1.4;
@@ -227,11 +232,12 @@
   color: var(--color-gray);
   padding: 0 8rpx;
   flex-shrink: 0;
+  line-height: 1;
 }
 
 .detail-body {
   flex: 1;
-  padding: 28rpx 36rpx 48rpx;
+  padding: 28rpx 32rpx 48rpx;
 }
 
 .detail-content {

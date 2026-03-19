@@ -10,9 +10,11 @@
     "pages/healthchat/index",
     "pages/training/index",
     "pages/trainingchat/index",
-    "pages/guide/index"
+    "pages/guide/index",
+    "pages/petbook/index"
   ],
   "tabBar": {
+    "custom": true,
     "color": "#999999",
     "selectedColor": "#FF9F43",
     "backgroundColor": "#ffffff",
@@ -23,12 +25,6 @@
         "text": "首页",
         "iconPath": "assets/tab/home.png",
         "selectedIconPath": "assets/tab/home-on.png"
-      },
-      {
-        "pagePath": "pages/baike/index",
-        "text": "百科",
-        "iconPath": "assets/tab/book.png",
-        "selectedIconPath": "assets/tab/book-on.png"
       },
       {
         "pagePath": "pages/profile/index",

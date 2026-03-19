@@ -1,0 +1,244 @@
+<!-- pages/petbook/index.wxml -->
+<view>
+    <!-- ===== 页面主体 ===== -->
+    <view class="page">
+        <!-- 顶部 Header -->
+        <view class="header-bg">
+            <view style="height: {{statusBarHeight}}px;"></view>
+            <view class="nav-row" style="height: {{navBarHeight}}px;">
+                <view class="nav-back" bindtap="goBack">‹</view>
+                <text class="nav-title">宠物档案</text>
+                <view class="nav-placeholder"></view>
+            </view>
+            <!-- 宠物头像 + 基础信息 -->
+            <view class="pet-hero" wx:if="{{pet}}">
+                <view class="pet-hero-avatar">
+                    <text class="pet-hero-emoji">{{pet.type === 'cat' ? '🐱' : '🐕'}}</text>
+                </view>
+                <view class="pet-hero-info">
+                    <text class="pet-hero-name">{{pet.name}}</text>
+                    <view class="pet-hero-tags">
+                        <text class="hero-tag">{{pet.type === 'cat' ? '猫咪' : '狗狗'}}</text>
+                        <text class="hero-tag" wx:if="{{pet.breed}}">{{pet.breed}}</text>
+                        <text class="hero-tag" wx:if="{{petAge}}">{{petAge}}</text>
+                    </view>
+                </view>
+                <view class="hero-edit-btn" bindtap="openBaseEdit">编辑</view>
+            </view>
+            <view class="header-arc"></view>
+        </view>
+        <!-- 内容区 -->
+        <scroll-view class="content-wrap" scroll-y>
+            <!-- 无宠物引导 -->
+            <view class="empty-card" wx:if="{{!pet}}">
+                <text class="empty-icon">🐾</text>
+                <text class="empty-tip">先填写宠物基础信息</text>
+                <button class="empty-btn" bindtap="openBaseEdit">+ 立即添加</button>
+            </view>
+            <block wx:if="{{pet}}">
+                <!-- 基础数据条 -->
+                <view class="stat-row">
+                    <view class="stat-item">
+                        <text class="stat-val">{{pet.weight ? pet.weight + 'kg' : '--'}}</text>
+                        <text class="stat-label">体重</text>
+                    </view>
+                    <view class="stat-divider"></view>
+                    <view class="stat-item">
+                        <text class="stat-val">{{petAge || '--'}}</text>
+                        <text class="stat-label">年龄</text>
+                    </view>
+                    <view class="stat-divider"></view>
+                    <view class="stat-item">
+                        <text class="stat-val">{{pet.birthday || '--'}}</text>
+                        <text class="stat-label">生日</text>
+                    </view>
+                </view>
+                <!-- 性格标签 -->
+                <view class="section-card">
+                    <view class="section-header">
+                        <view class="section-title-row">
+                            <text class="section-icon">✨</text>
+                            <text class="section-title">性格特点</text>
+                        </view>
+                        <view class="section-add" bindtap="openTraitPicker">+ 添加</view>
+                    </view>
+                    <view class="trait-wrap" wx:if="{{traits && traits.length > 0}}">
+                        <view class="trait-tag" wx:for="{{traits}}" wx:key="index">
+                            <text>{{item}}</text>
+                            <text class="trait-del" bindtap="removeTrait" data-index="{{index}}">
+                                ×
+                            </text>
+                        </view>
+                    </view>
+                    <view class="empty-hint" wx:else>暂未添加性格标签，点击「+ 添加」选择</view>
+                </view>
+                <!-- 饮食偏好 -->
+                <view class="section-card">
+                    <view class="section-header">
+                        <view class="section-title-row">
+                            <text class="section-icon">🍖</text>
+                            <text class="section-title">饮食偏好</text>
+                        </view>
+                        <view class="section-edit" bindtap="openHabitEdit" data-key="diet">编辑</view>
+                    </view>
+                    <view class="habit-content" wx:if="{{habits.diet}}">
+                        <text class="habit-text">{{habits.diet}}</text>
+                    </view>
+                    <view class="empty-hint" wx:else>记录 TA 喜欢吃什么、不能吃什么…</view>
+                </view>
+                <!-- 作息规律 -->
+                <view class="section-card">
+                    <view class="section-header">
+                        <view class="section-title-row">
+                            <text class="section-icon">🌙</text>
+                            <text class="section-title">作息规律</text>
+                        </view>
+                        <view class="section-edit" bindtap="openHabitEdit" data-key="schedule">
+                            编辑
+                        </view>
+                    </view>
+                    <view class="habit-content" wx:if="{{habits.schedule}}">
+                        <text class="habit-text">{{habits.schedule}}</text>
+                    </view>
+                    <view class="empty-hint" wx:else>记录 TA 的睡眠时间、活跃时段…</view>
+                </view>
+                <!-- 喜欢的事 -->
+                <view class="section-card">
+                    <view class="section-header">
+                        <view class="section-title-row">
+                            <text class="section-icon">❤️</text>
+                            <text class="section-title">喜欢的事</text>
+                        </view>
+                        <view class="section-edit" bindtap="openHabitEdit" data-key="likes">
+                            编辑
+                        </view>
+                    </view>
+                    <view class="habit-content" wx:if="{{habits.likes}}">
+                        <text class="habit-text">{{habits.likes}}</text>
+                    </view>
+                    <view class="empty-hint" wx:else>记录 TA 最爱的玩具、活动、地方…</view>
+                </view>
+                <!-- 害怕的事 -->
+                <view class="section-card">
+                    <view class="section-header">
+                        <view class="section-title-row">
+                            <text class="section-icon">😨</text>
+                            <text class="section-title">害怕的事</text>
+                        </view>
+                        <view class="section-edit" bindtap="openHabitEdit" data-key="fears">
+                            编辑
+                        </view>
+                    </view>
+                    <view class="habit-content" wx:if="{{habits.fears}}">
+                        <text class="habit-text">{{habits.fears}}</text>
+                    </view>
+                    <view class="empty-hint" wx:else>记录 TA 的恐惧、敏感点…</view>
+                </view>
+                <!-- 成长备忘 -->
+                <view class="section-card">
+                    <view class="section-header">
+                        <view class="section-title-row">
+                            <text class="section-icon">📝</text>
+                            <text class="section-title">成长备忘</text>
+                        </view>
+                        <view class="section-add" bindtap="openMemoAdd">+ 记一笔</view>
+                    </view>
+                    <view wx:if="{{memos && memos.length > 0}}">
+                        <view class="memo-item" wx:for="{{memos}}" wx:key="index">
+                            <view class="memo-header">
+                                <text class="memo-date">{{item.date}}</text>
+                                <text class="memo-del" bindtap="removeMemo" data-index="{{index}}">
+                                    删除
+                                </text>
+                            </view>
+                            <text class="memo-content">{{item.content}}</text>
+                        </view>
+                    </view>
+                    <view class="empty-hint" wx:else>记录 TA 成长中的点点滴滴…</view>
+                </view>
+                <view style="height: 40rpx;"></view>
+            </block>
+        </scroll-view>
+    </view>
+    <!-- ===== 弹层区（移出 page，fixed 才能真正覆盖视窗和 tabBar）===== -->
+    <!-- 性格标签选择弹层 -->
+    <view class="mask" wx:if="{{showTraitPicker}}" bindtap="closeTraitPicker"></view>
+    <view class="bottom-sheet" wx:if="{{showTraitPicker}}" catchtap="noop">
+        <view class="sheet-handle"></view>
+        <view class="sheet-title-row">
+            <text class="sheet-title">选择性格标签</text>
+            <text class="sheet-close" bindtap="closeTraitPicker">✕</text>
+        </view>
+        <view class="preset-label">快速选择</view>
+        <view class="preset-tags">
+            <view class="preset-tag {{traits.indexOf(item) >= 0 ? 'selected' : ''}}" wx:for="{{presetTraits}}" wx:key="index" bindtap="toggleTrait" data-val="{{item}}">
+                {{item}}
+            </view>
+        </view>
+        <view class="preset-label">自定义添加</view>
+        <view class="custom-input-row">
+            <input class="custom-input" placeholder="输入自定义标签" value="{{customTrait}}" bindinput="onCustomTraitInput" maxlength="10" />
+            <view class="custom-add-btn" bindtap="addCustomTrait">添加</view>
+        </view>
+        <button class="sheet-confirm-btn" bindtap="closeTraitPicker">完成</button>
+    </view>
+    <!-- 习性编辑弹层 -->
+    <view class="mask" wx:if="{{showHabitEdit}}" bindtap="closeHabitEdit"></view>
+    <view class="bottom-sheet" wx:if="{{showHabitEdit}}" catchtap="noop">
+        <view class="sheet-handle"></view>
+        <view class="sheet-title-row">
+            <text class="sheet-title">{{habitEditTitle}}</text>
+            <text class="sheet-close" bindtap="closeHabitEdit">✕</text>
+        </view>
+        <textarea class="habit-textarea" placeholder="{{habitEditPlaceholder}}" value="{{habitEditVal}}" bindinput="onHabitInput" maxlength="200" auto-height />
+        <button class="sheet-confirm-btn" bindtap="saveHabit">保存</button>
+    </view>
+    <!-- 成长备忘添加弹层 -->
+    <view class="mask" wx:if="{{showMemoAdd}}" bindtap="closeMemoAdd"></view>
+    <view class="bottom-sheet" wx:if="{{showMemoAdd}}" catchtap="noop">
+        <view class="sheet-handle"></view>
+        <view class="sheet-title-row">
+            <text class="sheet-title">记一笔</text>
+            <text class="sheet-close" bindtap="closeMemoAdd">✕</text>
+        </view>
+        <textarea class="habit-textarea" placeholder="记录今天发现的有趣习惯、成长变化…" value="{{memoInput}}" bindinput="onMemoInput" maxlength="300" auto-height />
+        <button class="sheet-confirm-btn" bindtap="saveMemo">保存</button>
+    </view>
+    <!-- 基础信息编辑弹层 -->
+    <view class="mask" wx:if="{{showBaseEdit}}" bindtap="closeBaseEdit"></view>
+    <view class="bottom-sheet tall-sheet" wx:if="{{showBaseEdit}}" catchtap="noop">
+        <view class="sheet-handle"></view>
+        <text class="sheet-title-center">{{pet ? '编辑基础信息' : '添加宠物'}}</text>
+        <view class="form-row">
+            <text class="form-label">名字 *</text>
+            <input class="form-input" placeholder="起个可爱的名字" value="{{form.name}}" bindinput="onNameInput" />
+        </view>
+        <view class="form-row">
+            <text class="form-label">种类 *</text>
+            <view class="type-row">
+                <view class="type-btn {{form.type === 'cat' ? 'selected' : ''}}" bindtap="setType" data-type="cat">
+                    🐱 猫咪
+                </view>
+                <view class="type-btn {{form.type === 'dog' ? 'selected' : ''}}" bindtap="setType" data-type="dog">
+                    🐕 狗狗
+                </view>
+            </view>
+        </view>
+        <view class="form-row">
+            <text class="form-label">品种</text>
+            <input class="form-input" placeholder="如：英短、柯基" value="{{form.breed}}" bindinput="onBreedInput" />
+        </view>
+        <view class="form-row">
+            <text class="form-label">生日</text>
+            <input class="form-input" placeholder="格式：2023-06" value="{{form.birthday}}" bindinput="onBirthdayInput" />
+        </view>
+        <view class="form-row">
+            <text class="form-label">体重 (kg)</text>
+            <input class="form-input" placeholder="如：4.5" type="digit" value="{{form.weight}}" bindinput="onWeightInput" />
+        </view>
+        <view class="modal-btns">
+            <button class="modal-cancel" bindtap="closeBaseEdit">取消</button>
+            <button class="modal-save" bindtap="savePet">保存</button>
+        </view>
+    </view>
+</view>

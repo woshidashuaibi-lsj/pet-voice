@@ -7,7 +7,7 @@
   <view class="nav-bar" style="height: {{navBarHeight}}px;">
     <navigator open-type="navigateBack" class="nav-back">← 返回</navigator>
     <text class="nav-title-sm">💊 宠物健康</text>
-    <view style="width:80rpx;"></view>
+    <view style="width:100rpx;"></view>
   </view>
 
   <!-- AI 问诊入口横幅 -->
@@ -58,38 +58,57 @@
       <text class="empty-icon">🔍</text>
       <text class="empty-text">暂无相关内容</text>
     </view>
+
+    <!-- 底部留白 -->
+    <view class="list-bottom"></view>
   </scroll-view>
 
   <!-- 知识详情弹层 -->
   <view class="detail-mask" wx:if="{{showDetail}}" bindtap="closeDetail">
     <view class="detail-sheet" catchtap="noop">
+
+      <!-- 拖动指示条 -->
+      <view class="detail-drag-bar">
+        <view class="detail-drag-bar-inner"></view>
+      </view>
+
+      <!-- 标题 + 关闭按钮 -->
       <view class="detail-header">
         <text class="detail-title">{{currentItem.title}}</text>
-        <view class="detail-close" bindtap="closeDetail">✕</view>
+        <view class="detail-close-btn" bindtap="closeDetail">
+          <text class="detail-close-icon">✕</text>
+        </view>
       </view>
+
+      <!-- 标签行（分类标签 + 适用宠物）-->
+      <view class="detail-meta-row">
+        <view class="kc-tag" style="background:{{currentItem.tagColor}}20; color:{{currentItem.tagColor}}">
+          {{currentItem.tag}}
+        </view>
+        <text class="detail-pet">{{currentItem.petLabel}}</text>
+      </view>
+
+      <!-- 正文内容 -->
       <scroll-view scroll-y class="detail-body">
-        <view class="detail-tag-row">
-          <view class="kc-tag" style="background:{{currentItem.tagColor}}20; color:{{currentItem.tagColor}}">
-            {{currentItem.tag}}
-          </view>
-          <text class="detail-pet">{{currentItem.petLabel}}</text>
-        </view>
-        <text class="detail-content">{{currentItem.content}}</text>
+        <view class="detail-body-inner">
 
-        <!-- 相关症状提示 -->
-        <view class="detail-symptoms" wx:if="{{currentItem.symptoms && currentItem.symptoms.length > 0}}">
-          <text class="detail-symptoms-title">⚠️ 需要就医的信号</text>
-          <view wx:for="{{currentItem.symptoms}}" wx:key="*this" wx:for-item="s" class="symptom-item">
-            <text class="symptom-dot">•</text>
-            <text class="symptom-text">{{s}}</text>
+          <!-- 正文卡片 -->
+          <view class="detail-content-card">
+            <text class="detail-content">{{currentItem.content}}</text>
           </view>
-        </view>
 
-        <!-- 底部问诊引导 -->
-        <view class="detail-ask-btn" bindtap="goAskVetWithTopic">
-          <text>🩺 有疑问？问问 AI 宠物医生</text>
+          <!-- 需要就医的信号 -->
+          <view class="detail-symptoms" wx:if="{{currentItem.symptoms && currentItem.symptoms.length > 0}}">
+            <text class="detail-symptoms-title">⚠️ 需要就医的信号</text>
+            <view wx:for="{{currentItem.symptoms}}" wx:key="*this" wx:for-item="s" class="symptom-item">
+              <text class="symptom-dot">●</text>
+              <text class="symptom-text">{{s}}</text>
+            </view>
+          </view>
+
         </view>
       </scroll-view>
+
     </view>
   </view>
 </view>

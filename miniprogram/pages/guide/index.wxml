@@ -1,23 +1,13 @@
 <!-- pages/guide/index.wxml -->
 <view class="page">
+  <!-- 状态栏占位 -->
   <view style="height: {{statusBarHeight}}px;"></view>
 
-  <!-- 导航栏 -->
+  <!-- 导航栏（与百科一致）-->
   <view class="nav-bar" style="height: {{navBarHeight}}px;">
     <navigator open-type="navigateBack" class="nav-back">← 返回</navigator>
     <text class="nav-title-sm">📋 养宠指南</text>
-    <view style="width:80rpx;"></view>
-  </view>
-
-  <!-- 顶部说明横幅 -->
-  <view class="guide-banner">
-    <view class="guide-banner-left">
-      <text class="guide-banner-icon">🐾</text>
-      <view>
-        <text class="guide-banner-title">从零开始养好宠物</text>
-        <text class="guide-banner-sub">从迎接回家到全程陪伴，一步一步来</text>
-      </view>
-    </view>
+    <view style="width:100rpx;"></view>
   </view>
 
   <!-- 猫狗切换 Tab -->
@@ -34,6 +24,7 @@
 
   <!-- 生命阶段列表 -->
   <scroll-view scroll-y class="stage-scroll">
+
     <view wx:for="{{stageList}}" wx:key="_id" class="stage-section">
 
       <!-- 阶段标题 -->
@@ -55,14 +46,17 @@
         </view>
         <view class="gc-content">
           <text class="gc-title">{{guide.title}}</text>
-          <text class="gc-arrow">阅读全文 →</text>
+          <view class="gc-footer">
+            <text class="gc-arrow">阅读全文</text>
+            <text class="gc-chevron"> ›</text>
+          </view>
         </view>
       </view>
 
     </view>
 
     <!-- 底部留白 -->
-    <view style="height: 60rpx;"></view>
+    <view class="list-bottom"></view>
   </scroll-view>
 
   <!-- 详情弹层 -->

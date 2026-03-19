@@ -2,21 +2,50 @@
 
 .page {
   background: var(--color-bg);
-  min-height: 100vh;
+  height: 100vh;
   display: flex;
   flex-direction: column;
+  overflow: hidden;
+}
+
+/* ---- 导航栏 ---- */
+.nav-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 28rpx;
+  background: var(--color-bg);
+  border-bottom: 1rpx solid var(--color-border);
+  flex-shrink: 0;
+}
+
+.nav-back {
+  font-size: 28rpx;
+  color: var(--color-primary);
+  padding: 10rpx 0;
+  min-width: 100rpx;
+  font-weight: 500;
+}
+
+.nav-title-sm {
+  font-size: 34rpx;
+  font-weight: 700;
+  color: var(--color-text);
+  text-align: center;
+  flex: 1;
 }
 
 /* ---- AI 问诊横幅 ---- */
 .ask-banner {
-  margin: 20rpx 32rpx 24rpx;
+  margin: 20rpx 28rpx 0;
   background: linear-gradient(135deg, #FF9F43, #FF7043);
-  border-radius: 24rpx;
-  padding: 32rpx 36rpx;
+  border-radius: 20rpx;
+  padding: 28rpx 32rpx;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  box-shadow: 0 8rpx 32rpx rgba(255, 159, 67, 0.35);
+  box-shadow: 0 6rpx 24rpx rgba(255, 159, 67, 0.30);
+  flex-shrink: 0;
 }
 
 .ask-banner-left {
@@ -26,13 +55,13 @@
 }
 
 .ask-banner-icon {
-  font-size: 56rpx;
+  font-size: 48rpx;
   line-height: 1;
 }
 
 .ask-banner-title {
   display: block;
-  font-size: 32rpx;
+  font-size: 30rpx;
   font-weight: 700;
   color: #fff;
   margin-bottom: 6rpx;
@@ -45,31 +74,33 @@
 }
 
 .ask-banner-arrow {
-  font-size: 36rpx;
-  color: #fff;
-  font-weight: 700;
+  font-size: 32rpx;
+  color: rgba(255,255,255,0.90);
+  font-weight: 600;
 }
 
-/* ---- 分类 Tab ---- */
+/* ---- 分类 Tab（与百科一致）---- */
 .tab-row {
   display: flex;
+  justify-content: center;
   gap: 16rpx;
-  padding: 0 32rpx 24rpx;
+  padding: 20rpx 28rpx 16rpx;
+  flex-shrink: 0;
 }
 
 .tab-btn {
-  padding: 12rpx 32rpx;
-  border-radius: 32rpx;
+  padding: 12rpx 36rpx;
+  border-radius: 40rpx;
   font-size: 26rpx;
   color: var(--color-gray);
   background: var(--color-white);
   border: 2rpx solid var(--color-border);
-  transition: all 0.15s;
+  font-weight: 500;
 }
 
 .tab-active {
-  color: var(--color-primary);
-  background: var(--color-primary-light);
+  background: var(--color-primary);
+  color: #fff;
   border-color: var(--color-primary);
   font-weight: 600;
 }
@@ -77,16 +108,19 @@
 /* ---- 知识列表 ---- */
 .knowledge-list {
   flex: 1;
-  padding: 0 32rpx 40rpx;
-  height: calc(100vh - 480rpx);  /* 留出导航栏+横幅+tab 高度 */
+  height: 0;
 }
 
 .knowledge-card {
   background: var(--color-white);
   border-radius: 20rpx;
   padding: 28rpx 32rpx;
-  margin-bottom: 20rpx;
+  margin: 0 28rpx 16rpx;
   box-shadow: 0 4rpx 16rpx rgba(0,0,0,0.05);
+}
+
+.knowledge-card:active {
+  opacity: 0.85;
 }
 
 .kc-header {
@@ -110,8 +144,8 @@
 
 .kc-title {
   display: block;
-  font-size: 30rpx;
-  font-weight: 600;
+  font-size: 32rpx;
+  font-weight: 700;
   color: var(--color-text);
   margin-bottom: 12rpx;
   line-height: 1.4;
@@ -120,9 +154,9 @@
 .kc-desc {
   display: block;
   font-size: 26rpx;
-  color: var(--color-gray);
-  line-height: 1.6;
-  margin-bottom: 16rpx;
+  color: #666;
+  line-height: 1.75;
+  margin-bottom: 18rpx;
 }
 
 .kc-footer {
@@ -141,11 +175,11 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: 80rpx 0;
+  padding: 100rpx 0;
 }
 
 .empty-icon {
-  font-size: 80rpx;
+  font-size: 72rpx;
   margin-bottom: 20rpx;
 }
 
@@ -154,60 +188,90 @@
   color: var(--color-gray);
 }
 
+/* ---- 列表底部留白 ---- */
+.list-bottom {
+  height: 40rpx;
+}
+
 /* ---- 详情弹层 ---- */
 .detail-mask {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
-  background: rgba(0,0,0,0.5);
-  z-index: 100;
+  background: rgba(0,0,0,0.50);
+  z-index: 9999;
   display: flex;
   align-items: flex-end;
 }
 
 .detail-sheet {
-  background: var(--color-white);
+  background: var(--color-bg);
   border-radius: 32rpx 32rpx 0 0;
   width: 100%;
-  max-height: 85vh;
+  max-height: 88vh;
   display: flex;
   flex-direction: column;
+  box-shadow: 0 -4rpx 32rpx rgba(0, 0, 0, 0.12);
 }
 
+/* ---- 弹层顶部拖动条 ---- */
+.detail-drag-bar {
+  display: flex;
+  justify-content: center;
+  padding: 16rpx 0 4rpx;
+  flex-shrink: 0;
+}
+
+.detail-drag-bar-inner {
+  width: 64rpx;
+  height: 6rpx;
+  background: rgba(0, 0, 0, 0.10);
+  border-radius: 6rpx;
+}
+
+/* ---- 弹层标题区 ---- */
 .detail-header {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  padding: 36rpx 36rpx 24rpx;
-  border-bottom: 1rpx solid var(--color-border);
+  padding: 20rpx 32rpx 24rpx;
   flex-shrink: 0;
 }
 
 .detail-title {
-  font-size: 32rpx;
+  font-size: 34rpx;
   font-weight: 700;
   color: var(--color-text);
   flex: 1;
-  line-height: 1.4;
-  padding-right: 24rpx;
+  line-height: 1.45;
+  padding-right: 20rpx;
 }
 
-.detail-close {
-  font-size: 36rpx;
-  color: var(--color-gray);
-  padding: 0 8rpx;
+.detail-close-btn {
+  width: 56rpx;
+  height: 56rpx;
+  background: var(--color-border);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   flex-shrink: 0;
 }
 
-.detail-body {
-  flex: 1;
-  padding: 28rpx 36rpx 40rpx;
+.detail-close-icon {
+  font-size: 28rpx;
+  color: var(--color-gray);
+  line-height: 1;
+  font-weight: 600;
 }
 
-.detail-tag-row {
+/* ---- 弹层标签行 ---- */
+.detail-meta-row {
   display: flex;
   align-items: center;
   gap: 16rpx;
-  margin-bottom: 28rpx;
+  padding: 0 32rpx 24rpx;
+  flex-shrink: 0;
+  border-bottom: 1rpx solid var(--color-border);
 }
 
 .detail-pet {
@@ -215,59 +279,69 @@
   color: var(--color-gray);
 }
 
+/* ---- 弹层内容区 ---- */
+.detail-body {
+  flex: 1;
+  height: 0;          /* 配合 flex:1 让 scroll-view 能正确计算高度 */
+  background: var(--color-bg);
+}
+
+.detail-body-inner {
+  padding: 24rpx 28rpx 48rpx;
+}
+
+.detail-content-card {
+  background: var(--color-white);
+  border-radius: 16rpx;
+  padding: 28rpx;
+  margin-bottom: 28rpx;
+  box-shadow: 0 2rpx 12rpx rgba(0,0,0,0.04);
+}
+
 .detail-content {
   display: block;
   font-size: 28rpx;
   color: var(--color-text);
-  line-height: 1.8;
+  line-height: 1.90;
   white-space: pre-wrap;
-  margin-bottom: 32rpx;
 }
 
 /* 需要就医的信号 */
 .detail-symptoms {
-  background: #FFF8E1;
+  background: #FFFBEB;
   border-radius: 16rpx;
-  padding: 24rpx 28rpx;
-  margin-bottom: 32rpx;
-  border-left: 6rpx solid #FFC107;
+  padding: 28rpx;
+  margin-bottom: 28rpx;
+  border: 2rpx solid rgba(255, 193, 7, 0.40);
 }
 
 .detail-symptoms-title {
   display: block;
   font-size: 26rpx;
-  font-weight: 600;
-  color: #856404;
-  margin-bottom: 16rpx;
+  font-weight: 700;
+  color: #92640C;
+  margin-bottom: 18rpx;
 }
 
 .symptom-item {
   display: flex;
   align-items: flex-start;
-  margin-bottom: 10rpx;
+  gap: 10rpx;
+  margin-bottom: 14rpx;
 }
 
 .symptom-dot {
-  color: #856404;
-  margin-right: 10rpx;
-  font-size: 28rpx;
+  color: #D97706;
+  font-size: 22rpx;
+  margin-top: 4rpx;
+  flex-shrink: 0;
 }
 
 .symptom-text {
   font-size: 26rpx;
-  color: #856404;
+  color: #92640C;
   flex: 1;
-  line-height: 1.5;
+  line-height: 1.6;
 }
 
-/* 底部问诊按钮 */
-.detail-ask-btn {
-  background: linear-gradient(135deg, #FF9F43, #FF7043);
-  border-radius: 48rpx;
-  padding: 28rpx;
-  text-align: center;
-  color: #fff;
-  font-size: 28rpx;
-  font-weight: 600;
-  margin-bottom: 20rpx;
-}
+

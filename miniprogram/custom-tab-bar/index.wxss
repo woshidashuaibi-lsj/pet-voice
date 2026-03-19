@@ -1,0 +1,68 @@
+/* custom-tab-bar/index.wxss */
+
+.tab-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding-bottom: env(safe-area-inset-bottom);
+  background: #fff;
+  display: flex;
+  align-items: center;
+  box-sizing: content-box;
+  z-index: 900;
+  box-shadow: 0 -4rpx 24rpx rgba(0, 0, 0, 0.07);
+  border-radius: 36rpx 36rpx 0 0;
+  padding-top: 16rpx;
+  padding-bottom: calc(env(safe-area-inset-bottom) + 12rpx);
+}
+
+/* 每个 tab 容器，flex 均分 */
+.tab-item {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* ===== 胶囊 pill：包裹 emoji + 文字 ===== */
+.tab-pill {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 8rpx;
+  padding: 14rpx 28rpx;
+  border-radius: 48rpx;
+  background: transparent;
+}
+
+/* 选中态：暖橙渐变气泡 */
+.pill-active {
+  background: linear-gradient(135deg, #FFECD6, #FFD8A8);
+  box-shadow: 0 4rpx 16rpx rgba(255, 159, 67, 0.22);
+}
+
+/* ===== Emoji ===== */
+.icon-emoji {
+  font-size: 36rpx;
+  line-height: 1;
+  opacity: 0.28;
+}
+
+.emoji-active {
+  font-size: 38rpx;
+  opacity: 1;
+}
+
+/* ===== 文字 ===== */
+.tab-label {
+  font-size: 24rpx;
+  color: #C8C8C8;
+  font-weight: 400;
+  line-height: 1;
+}
+
+.label-active {
+  color: #FF9F43;
+  font-weight: 700;
+}

@@ -1,0 +1,20 @@
+<!-- custom-tab-bar/index.wxml -->
+<view class="tab-bar">
+
+  <!-- 首页 Tab -->
+  <view class="tab-item" bindtap="onTap" data-index="0" data-path="/pages/index/index">
+    <view class="tab-pill {{selected === 0 ? 'pill-active' : ''}}">
+      <text class="icon-emoji {{selected === 0 ? 'emoji-active' : ''}}">🐾</text>
+      <text class="tab-label {{selected === 0 ? 'label-active' : ''}}">首页</text>
+    </view>
+  </view>
+
+  <!-- 我的 Tab -->
+  <view class="tab-item" bindtap="onTap" data-index="1" data-path="/pages/profile/index">
+    <view class="tab-pill {{selected === 1 ? 'pill-active' : ''}}">
+      <text class="icon-emoji {{selected === 1 ? 'emoji-active' : ''}}">🐱</text>
+      <text class="tab-label {{selected === 1 ? 'label-active' : ''}}">我的</text>
+    </view>
+  </view>
+
+</view>
