@@ -5,7 +5,7 @@
   <!-- 导航栏 -->
   <view class="nav-bar" style="height: {{navBarHeight}}px;">
     <view style="width:80rpx;"></view>
-    <text class="nav-title">🤖 AI 智能助手</text>
+    <text class="nav-title">🤖 智能助手</text>
     <view style="width:80rpx;"></view>
   </view>
 
@@ -14,13 +14,13 @@
     <!-- 欢迎区域 -->
     <view class="welcome-section">
       <text class="welcome-icon">✨</text>
-      <text class="welcome-title">AI 智能助手</text>
+      <text class="welcome-title">智能助手</text>
       <text class="welcome-sub">专业的宠物咨询，随时为您服务</text>
     </view>
 
     <!-- AI 服务卡片 -->
     <view class="services-section">
-      <text class="section-title">📌 AI 服务</text>
+      <text class="section-title">📌 专属服务</text>
 
       <view wx:for="{{aiServices}}" wx:key="id" class="service-card" bindtap="goToService" data-path="{{item.path}}">
         <view class="service-icon" style="background: {{item.color}}20;">
@@ -62,7 +62,7 @@
     <view class="tip-section">
       <view class="tip-card">
         <text class="tip-icon">💡</text>
-        <text class="tip-text">AI 助手基于专业数据库训练，为您提供参考建议。如遇紧急情况，请及时就医。</text>
+        <text class="tip-text">本助手基于专业宠物知识库，为您提供参考建议。如遇紧急情况，请及时就医。</text>
       </view>
     </view>
 

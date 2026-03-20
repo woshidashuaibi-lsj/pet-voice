@@ -111,7 +111,7 @@ Page({
           healthAlert:  false,
         },
       })
-      wx.showToast({ title: 'AI 繁忙，已用默认解读', icon: 'none', duration: 2500 })
+      wx.showToast({ title: '服务繁忙，已用默认解读', icon: 'none', duration: 2500 })
     }
   },
 

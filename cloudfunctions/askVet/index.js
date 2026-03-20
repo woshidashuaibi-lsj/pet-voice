@@ -34,7 +34,7 @@ exports.main = async (event) => {
     return {
       success: false,
       error: err.message,
-      reply: '抱歉，AI 医生暂时无法响应，请稍后再试。如遇紧急情况请直接前往宠物医院。',
+      reply: '抱歉，服务暂时无法响应，请稍后再试。如遇紧急情况请直接前往宠物医院。',
     }
   }
 }

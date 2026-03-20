@@ -7,7 +7,7 @@ Page({
       {
         id: 'health',
         icon: '🏥',
-        title: 'AI 宠物问诊',
+        title: '智能宠物问诊',
         desc: '描述症状，获取专业健康建议',
         color: '#26DE81',
         path: '/pages/healthchat/index'
@@ -15,7 +15,7 @@ Page({
       {
         id: 'training',
         icon: '🎓',
-        title: 'AI 训练师',
+        title: '智能训练师',
         desc: '行为问题，定制专属训练方案',
         color: '#FF9F43',
         path: '/pages/training/index'

@@ -34,7 +34,7 @@ exports.main = async (event) => {
     return {
       success: false,
       error: err.message,
-      reply: '抱歉，AI 训练师暂时无法响应，请稍后再试。',
+      reply: '抱歉，服务暂时无法响应，请稍后再试。',
     }
   }
 }
