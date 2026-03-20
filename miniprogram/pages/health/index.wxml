@@ -15,7 +15,7 @@
     <view class="ask-banner-left">
       <text class="ask-banner-icon">🩺</text>
       <view>
-        <text class="ask-banner-title">AI 宠物问诊</text>
+        <text class="ask-banner-title">智能宠物问诊</text>
         <text class="ask-banner-sub">描述症状，秒获专业建议</text>
       </view>
     </view>

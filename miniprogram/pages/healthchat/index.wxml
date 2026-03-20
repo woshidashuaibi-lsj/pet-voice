@@ -4,7 +4,7 @@
   <view class="top-bar" style="height: {{statusBarHeight + navBarHeight}}px;">
     <view class="nav-content" style="padding-top: {{statusBarHeight}}px;">
       <navigator open-type="navigateBack" class="nav-back">← 返回</navigator>
-      <text class="nav-title-sm">🩺 AI 宠物问诊</text>
+      <text class="nav-title-sm">🩺 智能宠物问诊</text>
     </view>
   </view>
   <!-- 聊天消息列表 -->
@@ -12,7 +12,7 @@
     <!-- 欢迎占位 -->
     <view class="chat-welcome" wx:if="{{messages.length === 0}}">
       <text class="chat-welcome-icon">🩺</text>
-      <text class="chat-welcome-title">Hi，我是 AI 宠物医生</text>
+      <text class="chat-welcome-title">Hi，我是你的宠物健康助手</text>
       <text class="chat-welcome-sub">你可以问我关于{{petName ? petName : '宠物'}}的健康、饮食、行为等问题</text>
       <!-- 快捷问题 -->
       <view class="quick-questions">

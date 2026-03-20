@@ -12,7 +12,7 @@
     <view class="ask-banner-left">
       <text class="ask-banner-icon">🤖</text>
       <view>
-        <text class="ask-banner-title">AI 训练师</text>
+        <text class="ask-banner-title">智能训练师</text>
         <text class="ask-banner-sub">描述问题，获取专属训练方案</text>
       </view>
     </view>
@@ -108,7 +108,7 @@
         </view>
         <!-- 底部 AI 入口 -->
         <!-- <view class="detail-ask-btn" bindtap="goAskTrainerWithTopic">
-          <text>🤖 遇到问题？让 AI 训练师帮你</text>
+          <text>🤖 遇到问题？让智能训练师帮你</text>
         </view> -->
       </scroll-view>
     </view>

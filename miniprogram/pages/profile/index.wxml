@@ -103,7 +103,7 @@
     <view class="login-sheet" catchtap="noop">
       <view class="login-paw">🐾</view>
       <text class="login-title">欢迎来到毛孩子翻译官</text>
-      <text class="login-sub">授权头像和昵称，让 AI 认识你和你的宠物</text>
+      <text class="login-sub">授权头像和昵称，让我们更了解你和你的宠物</text>
 
       <button
         class="login-avatar-btn"
