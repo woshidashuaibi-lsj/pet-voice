@@ -155,10 +155,10 @@ Page({
     this.setData({ messages: [...this.data.messages, loadingMsg] })
     this._scrollToBottom()
 
-    // 3. 构建对话历史（最近10条，传给云函数）
+    // 3. 构建对话历史（最近6条，方案三：关键信息由 memory 承担，不依赖长历史）
     const historyForCloud = messages
-      .slice(-10)
-      .filter(m => !m.loading)
+      .filter(m => !m.loading && m.content)
+      .slice(-6)
       .map(m => ({ role: m.role, content: m.content }))
 
     try {
@@ -168,7 +168,7 @@ Page({
           messages: historyForCloud,
           petName:  this.data.petName,
           petType:  this.data.petType,
-          petId:    this.data.petId,   // 新增：传入 petId 让云函数读取 memory
+          petId:    this.data.petId,
         },
       })
 
@@ -180,6 +180,9 @@ Page({
         m.id === loadingMsgId ? { ...m, loading: false, content: '' } : m
       )
       this.setData({ messages: withEmpty, isLoading: false })
+
+      // Phase 4：静默触发隐式矫正检测（不等待结果，不影响用户）
+      this._detectCorrection(text)
 
       // 5. 打字机动画
       this._typewriter(loadingMsgId, reply)
@@ -229,6 +232,27 @@ Page({
     }
 
     step()
+  },
+
+  // ---- Phase 4：隐式矫正检测（静默异步，不影响用户体验）----
+  _detectCorrection(userMessage) {
+    if (!userMessage || !this.data.petId) return
+
+    wx.cloud.callFunction({
+      name: 'correctMemory',
+      data: {
+        userMessage,
+        petId:   this.data.petId,
+        petName: this.data.petName,
+        petType: this.data.petType,
+      },
+    }).then(res => {
+      if (res.result?.corrected) {
+        console.log('[healthchat] 检测到矫正:', res.result.correction)
+      }
+    }).catch(() => {
+      // 静默失败，不提示用户
+    })
   },
 
   clearChat() {

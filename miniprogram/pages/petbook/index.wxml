@@ -25,10 +25,21 @@
                 </view>
                 <view class="hero-edit-btn" bindtap="openBaseEdit">编辑</view>
             </view>
+            <!-- Tab 切换 -->
+            <view class="tab-bar" wx:if="{{pet}}">
+                <view class="tab-item {{activeTab === 'profile' ? 'tab-active' : ''}}" bindtap="switchTab" data-tab="profile">
+                    <text>宠物档案</text>
+                </view>
+                <view class="tab-item {{activeTab === 'memory' ? 'tab-active' : ''}}" bindtap="switchTab" data-tab="memory">
+                    <text>专属记忆</text>
+                    <view class="tab-badge" wx:if="{{completeness > 0 && completeness < 100}}">{{completeness}}%</view>
+                </view>
+            </view>
             <view class="header-arc"></view>
         </view>
-        <!-- 内容区 -->
-        <scroll-view class="content-wrap" scroll-y>
+
+        <!-- ===== 内容区（profile Tab）===== -->
+        <scroll-view class="content-wrap" scroll-y wx:if="{{activeTab === 'profile'}}">
             <!-- 无宠物引导 -->
             <view class="empty-card" wx:if="{{!pet}}">
                 <text class="empty-icon">🐾</text>
@@ -65,9 +76,7 @@
                     <view class="trait-wrap" wx:if="{{traits && traits.length > 0}}">
                         <view class="trait-tag" wx:for="{{traits}}" wx:key="index">
                             <text>{{item}}</text>
-                            <text class="trait-del" bindtap="removeTrait" data-index="{{index}}">
-                                ×
-                            </text>
+                            <text class="trait-del" bindtap="removeTrait" data-index="{{index}}">×</text>
                         </view>
                     </view>
                     <view class="empty-hint" wx:else>暂未添加性格标签，点击「+ 添加」选择</view>
@@ -93,9 +102,7 @@
                             <text class="section-icon">🌙</text>
                             <text class="section-title">作息规律</text>
                         </view>
-                        <view class="section-edit" bindtap="openHabitEdit" data-key="schedule">
-                            编辑
-                        </view>
+                        <view class="section-edit" bindtap="openHabitEdit" data-key="schedule">编辑</view>
                     </view>
                     <view class="habit-content" wx:if="{{habits.schedule}}">
                         <text class="habit-text">{{habits.schedule}}</text>
@@ -109,9 +116,7 @@
                             <text class="section-icon">❤️</text>
                             <text class="section-title">喜欢的事</text>
                         </view>
-                        <view class="section-edit" bindtap="openHabitEdit" data-key="likes">
-                            编辑
-                        </view>
+                        <view class="section-edit" bindtap="openHabitEdit" data-key="likes">编辑</view>
                     </view>
                     <view class="habit-content" wx:if="{{habits.likes}}">
                         <text class="habit-text">{{habits.likes}}</text>
@@ -125,9 +130,7 @@
                             <text class="section-icon">😨</text>
                             <text class="section-title">害怕的事</text>
                         </view>
-                        <view class="section-edit" bindtap="openHabitEdit" data-key="fears">
-                            编辑
-                        </view>
+                        <view class="section-edit" bindtap="openHabitEdit" data-key="fears">编辑</view>
                     </view>
                     <view class="habit-content" wx:if="{{habits.fears}}">
                         <text class="habit-text">{{habits.fears}}</text>
@@ -147,9 +150,7 @@
                         <view class="memo-item" wx:for="{{memos}}" wx:key="index">
                             <view class="memo-header">
                                 <text class="memo-date">{{item.date}}</text>
-                                <text class="memo-del" bindtap="removeMemo" data-index="{{index}}">
-                                    删除
-                                </text>
+                                <text class="memo-del" bindtap="removeMemo" data-index="{{index}}">删除</text>
                             </view>
                             <text class="memo-content">{{item.content}}</text>
                         </view>
@@ -159,8 +160,91 @@
                 <view style="height: 40rpx;"></view>
             </block>
         </scroll-view>
+
+        <!-- ===== 内容区（memory Tab）===== -->
+        <scroll-view class="content-wrap" scroll-y wx:if="{{activeTab === 'memory'}}">
+            <!-- 加载中 -->
+            <view class="memory-loading" wx:if="{{memoryLoading}}">
+                <text class="memory-loading-text">加载中…</text>
+            </view>
+
+            <block wx:if="{{!memoryLoading}}">
+                <!-- 档案完整度卡片 -->
+                <view class="completeness-card">
+                    <view class="completeness-header">
+                        <view class="completeness-title-row">
+                            <text class="completeness-icon">🧠</text>
+                            <text class="completeness-title">{{pet.name}}的专属记忆</text>
+                        </view>
+                        <view class="completeness-score">{{completeness}}%</view>
+                    </view>
+                    <!-- 进度条 -->
+                    <view class="progress-bar-bg">
+                        <view class="progress-bar-fill" style="width: {{completeness}}%;"></view>
+                    </view>
+                    <text class="completeness-tip">
+                        {{completeness >= 80 ? '档案很完整，助手已非常了解 TA ✨' : (completeness >= 50 ? '继续完善，助手会更懂 TA 🐾' : '档案有些空，多聊几次或手动补充吧 💡')}}
+                    </text>
+                    <!-- 缺失字段快速补充 -->
+                    <view class="missing-fields" wx:if="{{missingFields.length > 0}}">
+                        <text class="missing-label">待补充：</text>
+                        <view class="missing-tags">
+                            <view class="missing-tag" wx:for="{{missingFields}}" wx:key="key" bindtap="openFieldEdit" data-key="{{item.key}}" data-label="{{item.label}}">
+                                + {{item.label}}
+                            </view>
+                        </view>
+                    </view>
+                    <!-- 手动添加记忆按钮 -->
+                    <view class="memory-add-btn" bindtap="openMemoryAdd">
+                        <text>+ 手动添加记忆</text>
+                    </view>
+                </view>
+
+                <!-- 无记忆空状态 -->
+                <view class="empty-memory-card" wx:if="{{memoryGroups.length === 0}}">
+                    <text class="empty-icon">💭</text>
+                    <text class="empty-tip">还没有专属记忆</text>
+                    <text class="empty-sub">多与助手对话，TA 会自动记住{{pet.name}}的信息</text>
+                </view>
+
+                <!-- 记忆分组列表 -->
+                <view wx:for="{{memoryGroups}}" wx:key="category" class="memory-group-card">
+                    <view class="memory-group-header">
+                        <text class="memory-group-emoji">{{item.emoji}}</text>
+                        <text class="memory-group-label">{{item.label}}</text>
+                        <text class="memory-group-count">{{item.items.length}}条</text>
+                    </view>
+                    <!-- 记忆条目 -->
+                    <view wx:for="{{item.items}}" wx:key="_id" wx:for-item="mem" wx:for-index="memIdx" class="memory-item">
+                        <view class="memory-item-main">
+                            <view class="memory-item-left">
+                                <!-- 来源标签 -->
+                                <view class="memory-source-tag source-{{mem.source === 'user_correction' ? 'correction' : (mem.source === 'user_stated' ? 'stated' : (mem.source === 'vet_confirmed' ? 'vet' : 'ai'))}}">
+                                    {{mem.source === 'user_correction' ? '已矫正' : (mem.source === 'user_stated' ? '手动添加' : (mem.source === 'vet_confirmed' ? '医生确认' : 'AI提取'))}}
+                                </view>
+                                <text class="memory-content">{{mem.content}}</text>
+                            </view>
+                            <view class="memory-item-right">
+                                <text class="memory-date">{{mem.date}}</text>
+                                <view class="memory-delete-btn" bindtap="deleteMemory" data-id="{{mem._id}}" data-is-snapshot="{{mem.isSnapshot}}" data-category="{{item.category}}" data-index="{{memIdx}}" data-group-index="{{index}}">
+                                    ✕
+                                </view>
+                            </view>
+                        </view>
+                        <!-- 置信度条 -->
+                        <view class="confidence-bar-bg">
+                            <view class="confidence-bar-fill conf-{{mem.confidence >= 90 ? 'high' : (mem.confidence >= 60 ? 'mid' : 'low')}}" style="width: {{mem.confidence}}%;"></view>
+                        </view>
+                    </view>
+                </view>
+
+                <view style="height: 40rpx;"></view>
+            </block>
+        </scroll-view>
     </view>
-    <!-- ===== 弹层区（移出 page，fixed 才能真正覆盖视窗和 tabBar）===== -->
+
+    <!-- ===== 弹层区（fixed 覆盖视窗）===== -->
+
     <!-- 性格标签选择弹层 -->
     <view class="mask" wx:if="{{showTraitPicker}}" bindtap="closeTraitPicker"></view>
     <view class="bottom-sheet" wx:if="{{showTraitPicker}}" catchtap="noop">
@@ -182,6 +266,7 @@
         </view>
         <button class="sheet-confirm-btn" bindtap="closeTraitPicker">完成</button>
     </view>
+
     <!-- 习性编辑弹层 -->
     <view class="mask" wx:if="{{showHabitEdit}}" bindtap="closeHabitEdit"></view>
     <view class="bottom-sheet" wx:if="{{showHabitEdit}}" catchtap="noop">
@@ -193,6 +278,7 @@
         <textarea class="habit-textarea" placeholder="{{habitEditPlaceholder}}" value="{{habitEditVal}}" bindinput="onHabitInput" maxlength="200" auto-height />
         <button class="sheet-confirm-btn" bindtap="saveHabit">保存</button>
     </view>
+
     <!-- 成长备忘添加弹层 -->
     <view class="mask" wx:if="{{showMemoAdd}}" bindtap="closeMemoAdd"></view>
     <view class="bottom-sheet" wx:if="{{showMemoAdd}}" catchtap="noop">
@@ -204,6 +290,7 @@
         <textarea class="habit-textarea" placeholder="记录今天发现的有趣习惯、成长变化…" value="{{memoInput}}" bindinput="onMemoInput" maxlength="300" auto-height />
         <button class="sheet-confirm-btn" bindtap="saveMemo">保存</button>
     </view>
+
     <!-- 基础信息编辑弹层 -->
     <view class="mask" wx:if="{{showBaseEdit}}" bindtap="closeBaseEdit"></view>
     <view class="bottom-sheet tall-sheet" wx:if="{{showBaseEdit}}" catchtap="noop">
@@ -216,12 +303,8 @@
         <view class="form-row">
             <text class="form-label">种类 *</text>
             <view class="type-row">
-                <view class="type-btn {{form.type === 'cat' ? 'selected' : ''}}" bindtap="setType" data-type="cat">
-                    🐱 猫咪
-                </view>
-                <view class="type-btn {{form.type === 'dog' ? 'selected' : ''}}" bindtap="setType" data-type="dog">
-                    🐕 狗狗
-                </view>
+                <view class="type-btn {{form.type === 'cat' ? 'selected' : ''}}" bindtap="setType" data-type="cat">🐱 猫咪</view>
+                <view class="type-btn {{form.type === 'dog' ? 'selected' : ''}}" bindtap="setType" data-type="dog">🐕 狗狗</view>
             </view>
         </view>
         <view class="form-row">
@@ -240,5 +323,44 @@
             <button class="modal-cancel" bindtap="closeBaseEdit">取消</button>
             <button class="modal-save" bindtap="savePet">保存</button>
         </view>
+    </view>
+
+    <!-- 手动添加记忆弹层 -->
+    <view class="mask" wx:if="{{showMemoryAdd}}" bindtap="closeMemoryAdd"></view>
+    <view class="bottom-sheet" wx:if="{{showMemoryAdd}}" catchtap="noop">
+        <view class="sheet-handle"></view>
+        <view class="sheet-title-row">
+            <text class="sheet-title">手动添加记忆</text>
+            <text class="sheet-close" bindtap="closeMemoryAdd">✕</text>
+        </view>
+        <!-- 类别选择 -->
+        <view class="form-row">
+            <text class="form-label">记忆类别</text>
+            <picker mode="selector" range="{{['健康记录','饮食偏好','行为特征','重要事件']}}" bindchange="onMemoryAddCategoryChange">
+                <view class="picker-display">
+                    {{memoryAddCategory === 'health' ? '健康记录' : (memoryAddCategory === 'diet' ? '饮食偏好' : (memoryAddCategory === 'behavior' ? '行为特征' : '重要事件'))}}
+                    <text class="picker-arrow">›</text>
+                </view>
+            </picker>
+        </view>
+        <view class="form-row">
+            <text class="form-label">内容</text>
+            <textarea class="habit-textarea" placeholder="例：每天吃两顿，喜欢金枪鱼口味" value="{{memoryAddContent}}" bindinput="onMemoryAddContentInput" maxlength="100" auto-height />
+        </view>
+        <view class="memory-add-tip">💡 手动添加的信息会直接生效，助手下次对话就会知道</view>
+        <button class="sheet-confirm-btn" bindtap="saveMemoryAdd">保存</button>
+    </view>
+
+    <!-- 快速补充关键字段弹层 -->
+    <view class="mask" wx:if="{{showFieldEdit}}" bindtap="closeFieldEdit"></view>
+    <view class="bottom-sheet" wx:if="{{showFieldEdit}}" catchtap="noop">
+        <view class="sheet-handle"></view>
+        <view class="sheet-title-row">
+            <text class="sheet-title">补充「{{fieldEditLabel}}」</text>
+            <text class="sheet-close" bindtap="closeFieldEdit">✕</text>
+        </view>
+        <input class="form-input field-edit-input" placeholder="请输入…" value="{{fieldEditVal}}" bindinput="onFieldEditInput" />
+        <view class="field-edit-tip">这条信息会帮助助手更精准地了解{{pet.name}}</view>
+        <button class="sheet-confirm-btn" bindtap="saveFieldEdit">保存</button>
     </view>
 </view>

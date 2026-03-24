@@ -18,20 +18,34 @@ const CONFIDENCE_THRESHOLD = 60
 // ============================================================
 // 主函数入口
 // event 参数：
-//   messages  Array   完整对话历史 [{role, content}]
-//   petId     String  宠物文档 _id（可选，有则精准更新）
-//   petName   String  宠物名称
-//   petType   String  'cat' | 'dog'
-//   source    String  来源页面 'healthchat' | 'trainingchat'
+//   messages       Array   完整对话历史 [{role, content}]
+//   petId          String  宠物文档 _id（可选，有则精准更新）
+//   petName        String  宠物名称
+//   petType        String  'cat' | 'dog'
+//   source         String  来源页面 'healthchat' | 'trainingchat' | 'audio_analysis'
+//
+//   ── Phase 4 新增：录音分析直接写入模式 ──
+//   audioAnalysis  Object  录音分析结果（有此字段时跳过 LLM 提取，直接写入）
+//     {
+//       emotion:      String  情绪标签（如 '焦虑'）
+//       confidence:   Number  置信度 0-100
+//       date:         String  日期 'YYYY-MM-DD'（可选，默认今天）
+//     }
 // ============================================================
 exports.main = async (event) => {
   const {
-    messages = [],
-    petId    = '',
-    petName  = '',
-    petType  = 'cat',
-    source   = 'healthchat',
+    messages      = [],
+    petId         = '',
+    petName       = '',
+    petType       = 'cat',
+    source        = 'healthchat',
+    audioAnalysis = null,   // Phase 4：录音分析结果直接写入
   } = event
+
+  // ── Phase 4：录音分析直接写入分支（无需 LLM 提取）──
+  if (audioAnalysis) {
+    return await writeAudioAnalysis(petId, audioAnalysis, source)
+  }
 
   // 至少有 1 条用户消息才值得提取
   const userMessages = messages.filter(m => m.role === 'user')
@@ -381,4 +395,58 @@ function isSimilar(a, b) {
     if (longer.includes(char)) matchCount++
   }
   return matchCount / shorter.length > 0.6
+}
+
+// ============================================================
+// Phase 4：录音分析结果直接写入（无需 LLM 提取）
+// audioAnalysis: { emotion, confidence, date }
+// ============================================================
+async function writeAudioAnalysis(petId, audioAnalysis, source) {
+  try {
+    const db = cloud.database()
+    const now = new Date().toISOString().slice(0, 10)
+
+    const { emotion, confidence = 80, date = now } = audioAnalysis
+
+    if (!emotion || !emotion.trim()) {
+      return { success: true, skipped: true, reason: '录音分析情绪为空' }
+    }
+
+    if (confidence < 60) {
+      return { success: true, skipped: true, reason: '录音分析置信度低于阈值' }
+    }
+
+    // 解析 petId
+    let resolvedPetId = petId
+    if (!resolvedPetId) {
+      const res = await db.collection('pets').limit(1).get()
+      resolvedPetId = res.data[0]?._id || null
+    }
+    if (!resolvedPetId) {
+      return { success: false, error: '找不到宠物档案' }
+    }
+
+    const content = `情绪分析：${emotion}（置信度${confidence}%）`
+
+    // 只追加 events，不更新 snapshot（情绪是瞬时状态，不应覆盖长期档案）
+    await db.collection('pet_memory_events').add({
+      data: {
+        petId:        resolvedPetId,
+        content,
+        category:     'health',
+        confidence,
+        date,
+        source:       source || 'audio_analysis',
+        mentionCount: 0,
+        createdAt:    db.serverDate(),
+      },
+    })
+
+    console.log('[extractMemory] 录音分析写入成功:', content)
+    return { success: true, written: true, content }
+
+  } catch (err) {
+    console.error('[extractMemory] 录音分析写入失败:', err.message)
+    return { success: false, error: err.message }
+  }
 }

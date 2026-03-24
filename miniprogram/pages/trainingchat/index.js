@@ -153,19 +153,23 @@ Page({
     })
     this._scrollToBottom()
 
-    // 构建多轮对话历史（最近10条）
+    // 构建多轮对话历史（最近6条，方案三：关键信息由 memory 承担，不依赖长历史）
     const historyForCloud = messages
-      .slice(-10)
+      .filter(m => !m.loading && m.content)
+      .slice(-6)
       .map(m => ({ role: m.role, content: m.content }))
+
+    // Phase 4：静默触发隐式矫正检测
+    this._detectCorrection(text)
 
     // 调用云函数（升级为传 messages 多轮对话）
     wx.cloud.callFunction({
       name: 'askTrainer',
       data: {
-        messages: historyForCloud,  // 多轮对话历史
+        messages: historyForCloud,
         petName:  this.data.petName,
         petType:  this.data.petType,
-        petId:    this.data.petId,  // 传入 petId 让云函数读取 memory
+        petId:    this.data.petId,
       },
       success: (res) => {
         const reply = res.result?.reply || '抱歉，我暂时无法回答这个问题，请稍后再试。'
@@ -206,6 +210,27 @@ Page({
 
   _scrollToBottom() {
     this.setData({ scrollToId: 'chat-bottom' })
+  },
+
+  // ---- Phase 4：隐式矫正检测（静默异步，不影响用户体验）----
+  _detectCorrection(userMessage) {
+    if (!userMessage || !this.data.petId) return
+
+    wx.cloud.callFunction({
+      name: 'correctMemory',
+      data: {
+        userMessage,
+        petId:   this.data.petId,
+        petName: this.data.petName,
+        petType: this.data.petType,
+      },
+    }).then(res => {
+      if (res.result?.corrected) {
+        console.log('[trainingchat] 检测到矫正:', res.result.correction)
+      }
+    }).catch(() => {
+      // 静默失败，不提示用户
+    })
   },
 
   clearChat() {

@@ -1,0 +1,9 @@
+{
+  "name": "correctMemory",
+  "version": "1.0.0",
+  "description": "Phase 4：隐式反馈识别 - 检测对话中的矫正信号，自动更新宠物记忆档案",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}
