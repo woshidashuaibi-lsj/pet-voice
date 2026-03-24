@@ -16,6 +16,11 @@ const QUICK_QUESTIONS = [
 // 打字机速度（ms/字）—— 越小越快
 const TYPEWRITER_SPEED = 28
 
+// 方案二：摘要压缩阈值
+// 本轮有效消息字符数超过此值时，触发压缩；保留最近 KEEP_RECENT 条完整消息
+const COMPRESS_THRESHOLD = 1500  // 约等于 1000 Token
+const KEEP_RECENT        = 6     // 压缩后保留最近 6 条完整消息
+
 Page({
   data: {
     messages: [],
@@ -155,11 +160,11 @@ Page({
     this.setData({ messages: [...this.data.messages, loadingMsg] })
     this._scrollToBottom()
 
-    // 3. 构建对话历史（最近6条，方案三：关键信息由 memory 承担，不依赖长历史）
-    const historyForCloud = messages
-      .filter(m => !m.loading && m.content)
-      .slice(-6)
-      .map(m => ({ role: m.role, content: m.content }))
+    // 3. 构建对话历史（方案一+二+三组合）
+    //    方案三：petId 传入，askVet 读取 memory 注入 System Prompt（跨轮）
+    //    方案二：本轮消息超过阈值时，调用 summarizeHistory 压缩旧消息
+    //    方案一：方案二失败降级时，slice(-6) 兜底
+    const historyForCloud = await this._buildCompressedHistory(messages)
 
     try {
       const res = await wx.cloud.callFunction({
@@ -232,6 +237,59 @@ Page({
     }
 
     step()
+  },
+
+  // ---- 方案二：构建压缩后的对话历史 ----
+  // 流程：
+  //   1. 过滤 loading/空消息得到有效消息列表
+  //   2. 计算总字符数，未超阈值 → 直接返回（最多 KEEP_RECENT 条，方案一兜底）
+  //   3. 超阈值 → 把前半段发给 summarizeHistory 压缩，保留后半段完整消息
+  //   4. summarizeHistory 失败 → 降级为方案一 slice(-6)
+  async _buildCompressedHistory(messages) {
+    const valid = messages
+      .filter(m => !m.loading && m.content)
+      .map(m => ({ role: m.role, content: m.content }))
+
+    const totalChars = valid.reduce((s, m) => s + m.content.length, 0)
+
+    // 未超阈值：方案一兜底，直接返回最近 KEEP_RECENT 条
+    if (totalChars <= COMPRESS_THRESHOLD) {
+      return valid.slice(-KEEP_RECENT)
+    }
+
+    // 超阈值：触发方案二压缩
+    const oldMessages    = valid.slice(0, -KEEP_RECENT)
+    const recentMessages = valid.slice(-KEEP_RECENT)
+
+    if (oldMessages.length === 0) {
+      return recentMessages
+    }
+
+    try {
+      const res = await wx.cloud.callFunction({
+        name: 'summarizeHistory',
+        data: {
+          messages: oldMessages,
+          petName:  this.data.petName,
+          petType:  this.data.petType,
+        },
+      })
+
+      const summary = res.result?.summary || ''
+      if (!summary) throw new Error('摘要为空')
+
+      console.log('[healthchat] 方案二压缩成功，原', oldMessages.length, '条 →', summary.length, '字摘要')
+
+      // 摘要作为 system 角色插在历史最前面
+      return [
+        { role: 'system', content: `以下是本次对话前半段的摘要：${summary}` },
+        ...recentMessages,
+      ]
+    } catch (e) {
+      // 压缩失败 → 降级为方案一
+      console.warn('[healthchat] summarizeHistory 失败，降级方案一:', e.message || e)
+      return recentMessages
+    }
   },
 
   // ---- Phase 4：隐式矫正检测（静默异步，不影响用户体验）----

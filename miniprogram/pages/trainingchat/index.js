@@ -3,6 +3,10 @@ const app = getApp()
 
 const TYPEWRITER_SPEED = 30  // 每字间隔 ms
 
+// 方案二：摘要压缩阈值
+const COMPRESS_THRESHOLD = 1500
+const KEEP_RECENT        = 6
+
 Page({
   data: {
     messages: [],
@@ -153,32 +157,28 @@ Page({
     })
     this._scrollToBottom()
 
-    // 构建多轮对话历史（最近6条，方案三：关键信息由 memory 承担，不依赖长历史）
-    const historyForCloud = messages
-      .filter(m => !m.loading && m.content)
-      .slice(-6)
-      .map(m => ({ role: m.role, content: m.content }))
-
     // Phase 4：静默触发隐式矫正检测
     this._detectCorrection(text)
 
-    // 调用云函数（升级为传 messages 多轮对话）
-    wx.cloud.callFunction({
-      name: 'askTrainer',
-      data: {
-        messages: historyForCloud,
-        petName:  this.data.petName,
-        petType:  this.data.petType,
-        petId:    this.data.petId,
-      },
-      success: (res) => {
-        const reply = res.result?.reply || '抱歉，我暂时无法回答这个问题，请稍后再试。'
-        this._removeLoadingAndTypewrite(aiMsgId, reply)
-      },
-      fail: (err) => {
-        console.error('[trainingchat] callFunction fail:', err)
-        this._removeLoadingAndTypewrite(aiMsgId, '网络出现了问题，请检查连接后重试。')
-      },
+    // 构建对话历史（方案一+二+三组合）
+    this._buildCompressedHistory(messages).then(historyForCloud => {
+      wx.cloud.callFunction({
+        name: 'askTrainer',
+        data: {
+          messages: historyForCloud,
+          petName:  this.data.petName,
+          petType:  this.data.petType,
+          petId:    this.data.petId,
+        },
+        success: (res) => {
+          const reply = res.result?.reply || '抱歉，我暂时无法回答这个问题，请稍后再试。'
+          this._removeLoadingAndTypewrite(aiMsgId, reply)
+        },
+        fail: (err) => {
+          console.error('[trainingchat] callFunction fail:', err)
+          this._removeLoadingAndTypewrite(aiMsgId, '网络出现了问题，请检查连接后重试。')
+        },
+      })
     })
   },
 
@@ -210,6 +210,48 @@ Page({
 
   _scrollToBottom() {
     this.setData({ scrollToId: 'chat-bottom' })
+  },
+
+  // ---- 方案二：构建压缩后的对话历史 ----
+  async _buildCompressedHistory(messages) {
+    const valid = messages
+      .filter(m => !m.loading && m.content)
+      .map(m => ({ role: m.role, content: m.content }))
+
+    const totalChars = valid.reduce((s, m) => s + m.content.length, 0)
+
+    if (totalChars <= COMPRESS_THRESHOLD) {
+      return valid.slice(-KEEP_RECENT)
+    }
+
+    const oldMessages    = valid.slice(0, -KEEP_RECENT)
+    const recentMessages = valid.slice(-KEEP_RECENT)
+
+    if (oldMessages.length === 0) return recentMessages
+
+    try {
+      const res = await wx.cloud.callFunction({
+        name: 'summarizeHistory',
+        data: {
+          messages: oldMessages,
+          petName:  this.data.petName,
+          petType:  this.data.petType,
+        },
+      })
+
+      const summary = res.result?.summary || ''
+      if (!summary) throw new Error('摘要为空')
+
+      console.log('[trainingchat] 方案二压缩成功，原', oldMessages.length, '条 →', summary.length, '字摘要')
+
+      return [
+        { role: 'system', content: `以下是本次对话前半段的摘要：${summary}` },
+        ...recentMessages,
+      ]
+    } catch (e) {
+      console.warn('[trainingchat] summarizeHistory 失败，降级方案一:', e.message || e)
+      return recentMessages
+    }
   },
 
   // ---- Phase 4：隐式矫正检测（静默异步，不影响用户体验）----

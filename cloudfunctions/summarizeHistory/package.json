@@ -1,0 +1,9 @@
+{
+  "name": "summarizeHistory",
+  "version": "1.0.0",
+  "description": "方案二：将本轮对话中超出阈值的旧消息压缩成摘要，控制 Token 消耗",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}
