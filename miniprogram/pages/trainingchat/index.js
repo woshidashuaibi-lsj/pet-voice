@@ -12,7 +12,9 @@ Page({
     statusBarHeight: 0,
     navBarHeight: 44,
     keyboardHeight: 0,
+    petName: '',         // 新增：宠物名称
     petType: 'dog',
+    petId: '',           // 新增：宠物文档 _id，用于精准读写 memory
     quickQuestions: [
       '怎么训练狗狗坐下？',
       '猫咪抓家具怎么纠正？',
@@ -32,11 +34,8 @@ Page({
       navBarHeight:    app.globalData.navBarHeight || 44,
     })
 
-    // 从宠物信息中获取宠物类型
-    const petInfo = wx.getStorageSync('petInfo')
-    if (petInfo && petInfo.type) {
-      this.setData({ petType: petInfo.type === 'cat' ? 'cat' : 'dog' })
-    }
+    // 从数据库加载宠物信息（含 petId）
+    this._loadPetInfo()
 
     // 从训练详情页跳转时携带话题
     if (options.topic) {
@@ -57,6 +56,56 @@ Page({
     if (this._typewriterTimer) {
       clearTimeout(this._typewriterTimer)
     }
+
+    // 对话结束时静默提取宠物关键信息
+    this._extractMemory()
+  },
+
+  // ---- 加载宠物信息（含 petId）----
+  async _loadPetInfo() {
+    try {
+      const db = wx.cloud.database()
+      const res = await db.collection('pets').limit(1).get()
+      if (res.data[0]) {
+        this.setData({
+          petId:   res.data[0]._id  || '',
+          petName: res.data[0].name || '',
+          petType: res.data[0].type || 'dog',
+        })
+      }
+    } catch (e) {
+      // 无宠物档案也能正常使用，兼容旧版 storage 方式
+      const petInfo = wx.getStorageSync('petInfo')
+      if (petInfo && petInfo.type) {
+        this.setData({ petType: petInfo.type === 'cat' ? 'cat' : 'dog' })
+      }
+    }
+  },
+
+  // ---- 对话结束：静默触发记忆提取 ----
+  _extractMemory() {
+    const messages = this.data.messages
+    const userMsgCount = messages.filter(m => m.role === 'user').length
+    if (userMsgCount < 1) return
+
+    const validMessages = messages
+      .filter(m => !m.loading && m.content)
+      .map(m => ({ role: m.role, content: m.content }))
+
+    if (validMessages.length < 2) return
+
+    wx.cloud.callFunction({
+      name: 'extractMemory',
+      data: {
+        messages: validMessages,
+        petId:    this.data.petId,
+        petName:  this.data.petName,
+        petType:  this.data.petType,
+        source:   'trainingchat',
+      },
+    }).catch(err => {
+      console.log('[trainingchat] extractMemory 静默失败:', err)
+    })
   },
 
   onInput(e) {
@@ -91,34 +140,45 @@ Page({
   _sendText(text) {
     // 推入用户消息
     const userMsg = { id: this._nextId(), role: 'user', content: text }
-    // 推入 AI loading 占位
+    // 推入 loading 占位
     const aiMsgId = this._nextId()
     const aiMsg   = { id: aiMsgId, role: 'assistant', content: '', loading: true }
 
+    const messages = [...this.data.messages, userMsg]
+
     this.setData({
-      messages: [...this.data.messages, userMsg, aiMsg],
+      messages: [...messages, aiMsg],
       inputText: '',
       isLoading: true,
     })
     this._scrollToBottom()
 
-    // 调用云函数
+    // 构建多轮对话历史（最近10条）
+    const historyForCloud = messages
+      .slice(-10)
+      .map(m => ({ role: m.role, content: m.content }))
+
+    // 调用云函数（升级为传 messages 多轮对话）
     wx.cloud.callFunction({
       name: 'askTrainer',
-      data: { question: text },
+      data: {
+        messages: historyForCloud,  // 多轮对话历史
+        petName:  this.data.petName,
+        petType:  this.data.petType,
+        petId:    this.data.petId,  // 传入 petId 让云函数读取 memory
+      },
       success: (res) => {
         const reply = res.result?.reply || '抱歉，我暂时无法回答这个问题，请稍后再试。'
         this._removeLoadingAndTypewrite(aiMsgId, reply)
       },
       fail: (err) => {
-        console.error('askTrainer callFunction fail:', err)
+        console.error('[trainingchat] callFunction fail:', err)
         this._removeLoadingAndTypewrite(aiMsgId, '网络出现了问题，请检查连接后重试。')
       },
     })
   },
 
   _removeLoadingAndTypewrite(aiMsgId, fullText) {
-    // 先去掉 loading 状态
     const msgs = this.data.messages.map(m =>
       m.id === aiMsgId ? { ...m, loading: false, content: '' } : m
     )

@@ -25,6 +25,7 @@ Page({
     keyboardHeight: 0,
     petName: '',
     petType: 'cat',
+    petId: '',           // 新增：宠物文档 _id，用于精准读写 memory
     statusBarHeight: 0,
     navBarHeight: 44,
     quickQuestions: QUICK_QUESTIONS,
@@ -57,19 +58,24 @@ Page({
   },
 
   onUnload() {
-    // 页面卸载时清除打字机定时器
+    // 清除打字机定时器
     if (this._typewriterTimer) {
       clearTimeout(this._typewriterTimer)
       this._typewriterTimer = null
     }
+
+    // 对话结束时静默提取宠物关键信息
+    this._extractMemory()
   },
 
+  // ---- 加载宠物信息（含 petId）----
   async _loadPetInfo() {
     try {
       const db = wx.cloud.database()
       const res = await db.collection('pets').limit(1).get()
       if (res.data[0]) {
         this.setData({
+          petId:   res.data[0]._id  || '',
           petName: res.data[0].name || '',
           petType: res.data[0].type || 'cat',
         })
@@ -77,6 +83,36 @@ Page({
     } catch (e) {
       // 无宠物档案也能正常使用
     }
+  },
+
+  // ---- 对话结束：静默触发记忆提取 ----
+  _extractMemory() {
+    const messages = this.data.messages
+    // 至少要有 1 条用户消息才触发
+    const userMsgCount = messages.filter(m => m.role === 'user').length
+    if (userMsgCount < 1) return
+
+    // 过滤掉 loading 状态和空消息，只保留有效对话
+    const validMessages = messages
+      .filter(m => !m.loading && m.content)
+      .map(m => ({ role: m.role, content: m.content }))
+
+    if (validMessages.length < 2) return
+
+    // 静默调用云函数，不等待结果，不影响用户
+    wx.cloud.callFunction({
+      name: 'extractMemory',
+      data: {
+        messages: validMessages,
+        petId:    this.data.petId,
+        petName:  this.data.petName,
+        petType:  this.data.petType,
+        source:   'healthchat',
+      },
+    }).catch(err => {
+      // 静默失败，不提示用户
+      console.log('[healthchat] extractMemory 静默失败:', err)
+    })
   },
 
   onInput(e) {
@@ -113,13 +149,13 @@ Page({
     this.setData({ messages, isLoading: true })
     this._scrollToBottom()
 
-    // 2. 加入 AI loading 占位气泡
+    // 2. 加入 loading 占位气泡
     const loadingMsgId = nextId()
     const loadingMsg = { id: loadingMsgId, role: 'assistant', content: '', loading: true }
     this.setData({ messages: [...this.data.messages, loadingMsg] })
     this._scrollToBottom()
 
-    // 3. 构建对话历史
+    // 3. 构建对话历史（最近10条，传给云函数）
     const historyForCloud = messages
       .slice(-10)
       .filter(m => !m.loading)
@@ -132,23 +168,24 @@ Page({
           messages: historyForCloud,
           petName:  this.data.petName,
           petType:  this.data.petType,
+          petId:    this.data.petId,   // 新增：传入 petId 让云函数读取 memory
         },
       })
 
       const result = res.result || {}
       const reply = result.reply || '抱歉，我暂时无法回答，请稍后重试。'
 
-      // 4. 先把 loading 气泡切换为空文本（停止动画）
+      // 4. 停止 loading 动画
       const withEmpty = this.data.messages.map(m =>
         m.id === loadingMsgId ? { ...m, loading: false, content: '' } : m
       )
       this.setData({ messages: withEmpty, isLoading: false })
 
-      // 5. 启动打字机动画
+      // 5. 打字机动画
       this._typewriter(loadingMsgId, reply)
 
     } catch (e) {
-      console.error('[health-chat] 调用失败:', e)
+      console.error('[healthchat] 调用失败:', e)
       const errMessages = this.data.messages.map(m =>
         m.id === loadingMsgId
           ? { ...m, loading: false, content: '网络异常，请检查网络后重试 😢' }
@@ -163,11 +200,9 @@ Page({
     this._isTyping = true
     let index = 0
 
-    // 将文本拆成「字符」数组（正确处理 emoji 等多字节字符）
     const chars = [...fullText]
     const total = chars.length
 
-    // 每批次输出的字符数（加速感：前期慢、中期快）
     const step = () => {
       if (index >= total) {
         this._isTyping = false
@@ -176,19 +211,16 @@ Page({
         return
       }
 
-      // 每次追加 1-3 个字符（让速度看起来更自然）
       const chunkSize = index < 10 ? 1 : (index < 50 ? 2 : 3)
       const nextIndex = Math.min(index + chunkSize, total)
       const currentText = chars.slice(0, nextIndex).join('')
       index = nextIndex
 
-      // 更新对应消息的 content
       const updated = this.data.messages.map(m =>
         m.id === msgId ? { ...m, content: currentText } : m
       )
       this.setData({ messages: updated })
 
-      // 每隔几个字滚动一次（不是每个字都滚，减少性能消耗）
       if (index % 15 === 0 || index === total) {
         this._scrollToBottom()
       }
@@ -205,7 +237,6 @@ Page({
       content: '确认清空本次对话记录？',
       success: (res) => {
         if (res.confirm) {
-          // 清空前先停止打字机
           if (this._typewriterTimer) {
             clearTimeout(this._typewriterTimer)
             this._typewriterTimer = null

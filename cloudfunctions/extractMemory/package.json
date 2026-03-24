@@ -1,0 +1,9 @@
+{
+  "name": "extractMemory",
+  "version": "1.0.0",
+  "description": "从对话中提取宠物关键信息，存入宠物档案 memory 字段",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

@@ -1,5 +1,5 @@
 // cloudfunctions/askTrainer/index.js
-// AI 宠物训练师云函数
+// 宠物训练师云函数
 // 使用 MiniMax Chat Completion V2 回答宠物训练相关问题
 // 环境变量：MINIMAX_API_KEY（与 askVet 共用同一个 key）
 
@@ -11,23 +11,35 @@ cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
 // ============================================================
 // 主函数入口
 // event 参数：
-//   question  String  用户提问
+//   messages  Array   对话历史 [{role, content}]（多轮对话）
+//   question  String  用户提问（兼容旧版单轮模式）
 //   petName   String  宠物名称（可选）
 //   petType   String  'cat' | 'dog'（可选）
+//   petId     String  宠物文档 _id（可选，用于读取 memory）
 // ============================================================
 exports.main = async (event) => {
   const {
+    messages = [],
     question = '',
     petName  = '',
     petType  = 'dog',
+    petId    = '',
   } = event
 
-  if (!question || !question.trim()) {
+  // 兼容旧版单轮调用（只传 question）
+  const finalMessages = messages.length > 0
+    ? messages
+    : (question.trim() ? [{ role: 'user', content: question.trim() }] : [])
+
+  if (finalMessages.length === 0) {
     return { success: false, error: '问题不能为空' }
   }
 
   try {
-    const reply = await callMinimaxTrainer(question.trim(), petName, petType)
+    // 读取宠物记忆档案
+    const memory = await loadPetMemory(petId)
+
+    const reply = await callMinimaxTrainer(finalMessages, petName, petType, memory)
     return { success: true, reply }
   } catch (err) {
     console.error('[askTrainer] 调用失败:', err.message)
@@ -40,9 +52,63 @@ exports.main = async (event) => {
 }
 
 // ============================================================
-// 调用 MiniMax Chat Completion V2（纯文本）
+// 从数据库读取宠物记忆档案
 // ============================================================
-function callMinimaxTrainer(question, petName, petType) {
+async function loadPetMemory(petId) {
+  try {
+    const db = cloud.database()
+    let petDoc = null
+
+    if (petId) {
+      const res = await db.collection('pets').doc(petId).get()
+      petDoc = res.data
+    } else {
+      const res = await db.collection('pets').limit(1).get()
+      petDoc = res.data[0] || null
+    }
+
+    return petDoc?.memory || null
+  } catch (e) {
+    return null
+  }
+}
+
+// ============================================================
+// 将 memory 构建成背景描述字符串，注入 system prompt
+// ============================================================
+function buildMemoryContext(petName, memory) {
+  if (!memory) return ''
+
+  const parts = []
+
+  if (memory.behavior && memory.behavior.length > 0) {
+    const items = memory.behavior.map(i => (typeof i === 'string' ? i : i.content)).filter(Boolean)
+    if (items.length) parts.push(`已知行为问题：${items.join('；')}`)
+  }
+
+  if (memory.personality && memory.personality.length > 0) {
+    parts.push(`性格特点：${memory.personality.join('、')}`)
+  }
+
+  if (memory.diet && memory.diet.length > 0) {
+    const items = memory.diet.map(i => (typeof i === 'string' ? i : i.content)).filter(Boolean)
+    if (items.length) parts.push(`饮食偏好：${items.join('；')}`)
+  }
+
+  if (memory.health && memory.health.length > 0) {
+    const items = memory.health.map(i => (typeof i === 'string' ? i : i.content)).filter(Boolean)
+    if (items.length) parts.push(`健康状况：${items.join('；')}`)
+  }
+
+  if (parts.length === 0) return ''
+
+  return `\n\n【关于${petName}的已知信息】\n${parts.join('\n')}\n请结合以上背景提供针对性的训练方案。`
+}
+
+// ============================================================
+// 调用 MiniMax Chat Completion V2（支持多轮对话）
+// ============================================================
+function callMinimaxTrainer(userMessages, petName, petType, memory) {
   return new Promise((resolve, reject) => {
     const apiKey = process.env.MINIMAX_API_KEY
     if (!apiKey) {
@@ -53,9 +119,11 @@ function callMinimaxTrainer(question, petName, petType) {
     const petTypeText = petType === 'cat' ? '猫咪' : '狗狗'
     const petDesc = petName ? `主人的${petTypeText}叫 ${petName}` : `主人养了一只${petTypeText}`
 
-    // 系统提示：专业宠物训练师角色
+    // 注入宠物记忆背景
+    const memoryContext = buildMemoryContext(petName || '这只宠物', memory)
+
     const systemPrompt = `你是一位专业、耐心的宠物行为训练师，熟悉犬猫行为学和正向强化训练方法。
-${petDesc}。
+${petDesc}。${memoryContext}
 
 你的职责：
 1. 基于正向强化原则（奖励好行为，忽略不好行为，绝不体罚）给出训练建议
@@ -74,7 +142,7 @@ ${petDesc}。
 
     const messages = [
       { role: 'system', content: systemPrompt },
-      { role: 'user',   content: question },
+      ...userMessages,
     ]
 
     const body = JSON.stringify({
@@ -111,11 +179,11 @@ ${petDesc}。
 
           const text = resp.choices?.[0]?.message?.content || ''
           if (!text) {
-            reject(new Error('AI 返回内容为空'))
+            reject(new Error('返回内容为空'))
             return
           }
 
-          console.log('[askTrainer] AI 回复:', text.slice(0, 100))
+          console.log('[askTrainer] 回复:', text.slice(0, 100))
           resolve(text)
         } catch (e) {
           reject(new Error('解析响应失败: ' + e.message))

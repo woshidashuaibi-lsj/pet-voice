@@ -1,5 +1,5 @@
 // cloudfunctions/askVet/index.js
-// AI 宠物健康问诊云函数
+// 宠物健康问诊云函数
 // 使用 MiniMax Chat Completion V2 文本接口回答宠物健康咨询问题
 // 环境变量：MINIMAX_API_KEY
 
@@ -11,15 +11,17 @@ cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
 // ============================================================
 // 主函数入口
 // event 参数：
-//   messages  Array  对话历史（{role, content} 数组）
-//   petName   String 宠物名称（可选）
-//   petType   String 'cat' | 'dog'（可选）
+//   messages  Array   对话历史（{role, content} 数组）
+//   petName   String  宠物名称（可选）
+//   petType   String  'cat' | 'dog'（可选）
+//   petId     String  宠物文档 _id（可选，用于读取 memory）
 // ============================================================
 exports.main = async (event) => {
   const {
     messages = [],
-    petName = '',
-    petType = 'cat',
+    petName  = '',
+    petType  = 'cat',
+    petId    = '',
   } = event
 
   if (!messages || messages.length === 0) {
@@ -27,7 +29,10 @@ exports.main = async (event) => {
   }
 
   try {
-    const reply = await callMinimaxText(messages, petName, petType)
+    // 读取宠物记忆档案（有则注入背景，无则正常回复）
+    const memory = await loadPetMemory(petId)
+
+    const reply = await callMinimaxText(messages, petName, petType, memory)
     return { success: true, reply }
   } catch (err) {
     console.error('[askVet] 调用失败:', err.message)
@@ -40,9 +45,69 @@ exports.main = async (event) => {
 }
 
 // ============================================================
+// 从数据库读取宠物记忆档案
+// ============================================================
+async function loadPetMemory(petId) {
+  try {
+    const db = cloud.database()
+    let petDoc = null
+
+    if (petId) {
+      const res = await db.collection('pets').doc(petId).get()
+      petDoc = res.data
+    } else {
+      const res = await db.collection('pets').limit(1).get()
+      petDoc = res.data[0] || null
+    }
+
+    return petDoc?.memory || null
+  } catch (e) {
+    // 读取失败不影响对话，返回 null
+    return null
+  }
+}
+
+// ============================================================
+// 将 memory 构建成背景描述字符串，注入 system prompt
+// ============================================================
+function buildMemoryContext(petName, memory) {
+  if (!memory) return ''
+
+  const parts = []
+
+  if (memory.health && memory.health.length > 0) {
+    const items = memory.health.map(i => (typeof i === 'string' ? i : i.content)).filter(Boolean)
+    if (items.length) parts.push(`健康历史：${items.join('；')}`)
+  }
+
+  if (memory.behavior && memory.behavior.length > 0) {
+    const items = memory.behavior.map(i => (typeof i === 'string' ? i : i.content)).filter(Boolean)
+    if (items.length) parts.push(`行为特征：${items.join('；')}`)
+  }
+
+  if (memory.diet && memory.diet.length > 0) {
+    const items = memory.diet.map(i => (typeof i === 'string' ? i : i.content)).filter(Boolean)
+    if (items.length) parts.push(`饮食偏好：${items.join('；')}`)
+  }
+
+  if (memory.events && memory.events.length > 0) {
+    const items = memory.events.map(i => (typeof i === 'string' ? i : i.content)).filter(Boolean)
+    if (items.length) parts.push(`重要事件：${items.join('；')}`)
+  }
+
+  if (memory.personality && memory.personality.length > 0) {
+    parts.push(`性格特点：${memory.personality.join('、')}`)
+  }
+
+  if (parts.length === 0) return ''
+
+  return `\n\n【关于${petName}的已知信息】\n${parts.join('\n')}\n请结合以上背景提供个性化建议，如有关联请主动说明。`
+}
+
+// ============================================================
 // 调用 MiniMax Chat Completion V2（纯文本）
 // ============================================================
-function callMinimaxText(userMessages, petName, petType) {
+function callMinimaxText(userMessages, petName, petType, memory) {
   return new Promise((resolve, reject) => {
     const apiKey = process.env.MINIMAX_API_KEY
     if (!apiKey) {
@@ -53,9 +118,11 @@ function callMinimaxText(userMessages, petName, petType) {
     const petTypeText = petType === 'cat' ? '猫咪' : '狗狗'
     const petDesc = petName ? `主人的${petTypeText}叫 ${petName}` : `主人养了一只${petTypeText}`
 
-    // 系统提示：设定 AI 角色
+    // 注入宠物记忆背景
+    const memoryContext = buildMemoryContext(petName || '这只宠物', memory)
+
     const systemPrompt = `你是一位专业、温柔的宠物健康顾问，拥有丰富的猫咪和狗狗护理经验。
-${petDesc}。
+${petDesc}。${memoryContext}
 
 你的职责：
 1. 用通俗易懂的语言解答主人关于宠物健康、护理、饮食、行为的问题
@@ -71,7 +138,6 @@ ${petDesc}。
 - 最后视情况提示是否需要就医
 - 总字数控制在 200 字以内`
 
-    // 构建消息列表（系统提示 + 对话历史）
     const messages = [
       { role: 'system', content: systemPrompt },
       ...userMessages,
@@ -111,11 +177,11 @@ ${petDesc}。
 
           const text = resp.choices?.[0]?.message?.content || ''
           if (!text) {
-            reject(new Error('AI 返回内容为空'))
+            reject(new Error('返回内容为空'))
             return
           }
 
-          console.log('[askVet] AI 回复:', text.slice(0, 100))
+          console.log('[askVet] 回复:', text.slice(0, 100))
           resolve(text)
         } catch (e) {
           reject(new Error('解析响应失败: ' + e.message))
