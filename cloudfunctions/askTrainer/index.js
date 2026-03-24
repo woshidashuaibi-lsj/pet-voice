@@ -1,12 +1,33 @@
 // cloudfunctions/askTrainer/index.js
-// 宠物训练师云函数
-// 使用 MiniMax Chat Completion V2 回答宠物训练相关问题
-// 环境变量：MINIMAX_API_KEY（与 askVet 共用同一个 key）
+// 宠物训练师云函数 — Phase 3
+//   - 记忆衰减过滤：时间 × 引用次数 × 来源权重 综合评分，低分记忆不注入
+//   - 分层注入：第一层核心档案（必注入）+ 第二层近30天事件 + 第三层历史（按需）
+//   - 主动追问：随机概率追问档案中缺失的重要字段
+// 环境变量：MINIMAX_API_KEY
 
 const cloud = require('wx-server-sdk')
 const https = require('https')
 
 cloud.init({ env: cloud.DYNAMIC_CURRENT_ENV })
+
+// ============================================================
+// Phase 3：记忆衰减参数
+// ============================================================
+const MEMORY_SCORE_THRESHOLD = 40
+const DECAY_HALF_LIFE        = 180
+const MAX_MENTION_COUNT      = 20
+
+// ============================================================
+// Phase 3：主动追问 — 档案重要字段权重表
+// ============================================================
+const FIELD_WEIGHTS = {
+  vaccine_date:    { label: '疫苗接种时间', weight: 9 },
+  spayed:          { label: '是否已绝育',   weight: 8 },
+  chronic_disease: { label: '慢性病史',     weight: 8 },
+  allergy:         { label: '过敏史',       weight: 7 },
+  diet_brand:      { label: '常用粮食品牌', weight: 5 },
+  age:             { label: '具体年龄',     weight: 6 },
+}
 
 // ============================================================
 // 主函数入口
@@ -36,13 +57,22 @@ exports.main = async (event) => {
   }
 
   try {
-    // 取最后一条用户消息，用于检测是否在询问历史
+    // 取最后一条用户消息，用于分层注入的关键词检测
     const lastUserMsg = [...finalMessages].reverse().find(m => m.role === 'user')?.content || ''
 
-    // 读取宠物记忆档案（Phase 2：优先读 snapshot，按需查 events）
-    const memory = await loadPetMemory(petId, lastUserMsg)
+    // 读取宠物记忆档案（Phase 3：分层读取 + 衰减过滤）
+    const { memory, mentionUpdates, askField } = await loadPetMemoryLayered(petId, lastUserMsg)
 
-    const reply = await callMinimaxTrainer(finalMessages, petName, petType, memory)
+    // 调用大模型（传入 askField 用于追问）
+    const reply = await callMinimaxTrainer(finalMessages, petName, petType, memory, askField)
+
+    // 异步更新被引用记忆的 mentionCount（不阻塞返回）
+    if (mentionUpdates.length > 0) {
+      updateMentionCounts(mentionUpdates).catch(e =>
+        console.log('[askTrainer] mentionCount 更新失败（静默）:', e.message)
+      )
+    }
+
     return { success: true, reply }
   } catch (err) {
     console.error('[askTrainer] 调用失败:', err.message)
@@ -55,24 +85,24 @@ exports.main = async (event) => {
 }
 
 // ============================================================
-// 从数据库读取宠物记忆档案（Phase 2 双轨读取）
-// 优先读 pet_memory_snapshot（快照），
-// 用户提问中含历史关键词时额外查 pet_memory_events（事件流）
-// 兼容旧版 pets.memory 字段
+// Phase 3：分层读取宠物记忆
+// 返回：{ memory, mentionUpdates, askField }
 // ============================================================
-async function loadPetMemory(petId, userQuestion) {
+async function loadPetMemoryLayered(petId, userQuestion) {
+  const empty = { memory: null, mentionUpdates: [], askField: null }
+
   try {
     const db = cloud.database()
 
-    // Step 1：解析 petId（有则用，无则查第一只）
+    // Step 1：解析 petId
     let resolvedPetId = petId
     if (!resolvedPetId) {
       const res = await db.collection('pets').limit(1).get()
       resolvedPetId = res.data[0]?._id || null
     }
-    if (!resolvedPetId) return null
+    if (!resolvedPetId) return empty
 
-    // Step 2：读取 snapshot（日常对话只用这个）
+    // Step 2：读取 snapshot（第一层：核心档案）
     let snapshot = null
     try {
       const snapRes = await db.collection('pet_memory_snapshot')
@@ -80,113 +110,236 @@ async function loadPetMemory(petId, userQuestion) {
         .limit(1)
         .get()
       snapshot = snapRes.data[0] || null
-    } catch (e) {
-      // snapshot 集合不存在，降级读旧版 pets.memory
-    }
+    } catch (e) { /* 集合不存在 */ }
 
-    // snapshot 集合不存在时，降级读旧版 pets.memory
+    // 降级：snapshot 不存在则读旧版 pets.memory
     if (!snapshot) {
       try {
         const petRes = await db.collection('pets').doc(resolvedPetId).get()
         const legacyMemory = petRes.data?.memory || null
         if (legacyMemory) {
           console.log('[askTrainer] 降级使用 pets.memory（旧版）')
-          return legacyMemory
+          return { memory: legacyMemory, mentionUpdates: [], askField: null }
         }
-      } catch (e) {
-        // 忽略
-      }
-      return null
+      } catch (e) { /* 忽略 */ }
+      return empty
     }
 
-    // Step 3：检测用户是否在询问历史，按需加载 events
-    const isAskingHistory = /以前|历史|之前|过去|曾经|以往|什么时候|多久/.test(userQuestion || '')
-    let historyEvents = []
+    // Step 3：第一层记忆经过衰减过滤
+    const filteredSnapshot = applyDecayFilter(snapshot)
 
+    // Step 4：第二层 — 近30天事件（每次都注入）
+    let recentEvents = []
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 3600 * 1000).toISOString()
+    try {
+      const recentRes = await db.collection('pet_memory_events')
+        .where({
+          petId: resolvedPetId,
+          createdAt: db.command.gte(new Date(thirtyDaysAgo)),
+        })
+        .orderBy('createdAt', 'desc')
+        .limit(10)
+        .get()
+      recentEvents = recentRes.data || []
+    } catch (e) { /* events 集合不存在 */ }
+
+    // Step 5：第三层 — 历史事件（仅当用户问历史时加载）
+    let historyEvents = []
+    const isAskingHistory = /以前|历史|之前|过去|曾经|以往|什么时候|多久/.test(userQuestion || '')
     if (isAskingHistory) {
       try {
-        const eventsRes = await db.collection('pet_memory_events')
+        const histRes = await db.collection('pet_memory_events')
           .where({ petId: resolvedPetId })
           .orderBy('createdAt', 'desc')
           .limit(20)
           .get()
-        historyEvents = eventsRes.data || []
-        console.log('[askTrainer] 按需加载历史事件:', historyEvents.length, '条')
-      } catch (e) {
-        // events 查询失败，不影响正常对话
-      }
+        const recentIds = new Set(recentEvents.map(e => e._id))
+        historyEvents = histRes.data.filter(e => !recentIds.has(e._id))
+        console.log('[askTrainer] 加载历史事件:', historyEvents.length, '条')
+      } catch (e) { /* 忽略 */ }
     }
 
-    // 将 snapshot + events 合并成统一结构返回
-    return buildMemoryFromDualTrack(snapshot, historyEvents)
+    const mentionUpdates = [
+      ...recentEvents.map(e => e._id),
+      ...historyEvents.map(e => e._id),
+    ].filter(Boolean)
+
+    const memory = buildLayeredMemory(filteredSnapshot, recentEvents, historyEvents)
+    const askField = shouldAskForInfo(snapshot)
+
+    return { memory, mentionUpdates, askField }
 
   } catch (e) {
-    console.log('[askTrainer] loadPetMemory 失败，跳过记忆注入:', e.message)
-    return null
+    console.log('[askTrainer] loadPetMemoryLayered 失败:', e.message)
+    return empty
   }
 }
 
-// 将双轨数据合并成统一的 memory 对象（与 buildMemoryContext 兼容）
-function buildMemoryFromDualTrack(snapshot, historyEvents) {
-  const memory = {
-    health:      snapshot.health      || [],
-    behavior:    snapshot.behavior    || [],
-    diet:        snapshot.diet        || [],
-    personality: snapshot.personality || [],
-    events:      snapshot.events      || [],
+// ============================================================
+// Phase 3：记忆衰减分数计算
+// ============================================================
+function calcMemoryScore(item) {
+  if (typeof item === 'string') return 80
+
+  const confidence   = item.confidence   || 80
+  const mentionCount = item.mentionCount || 0
+  const createdAt    = item.createdAt    || item.date
+
+  let decay = 1
+  if (createdAt) {
+    const daysSince = (Date.now() - new Date(createdAt)) / 86400000
+    decay = Math.exp(-daysSince / DECAY_HALF_LIFE)
   }
 
-  if (historyEvents.length > 0) {
-    const eventsByCategory = {}
-    for (const ev of historyEvents) {
-      if (!eventsByCategory[ev.category]) eventsByCategory[ev.category] = []
-      eventsByCategory[ev.category].push({ content: ev.content, date: ev.date })
-    }
-    if (eventsByCategory.health)   memory.health   = [...memory.health,   ...eventsByCategory.health]
-    if (eventsByCategory.behavior) memory.behavior = [...memory.behavior, ...eventsByCategory.behavior]
-    if (eventsByCategory.diet)     memory.diet     = [...memory.diet,     ...eventsByCategory.diet]
-    if (eventsByCategory.events)   memory.events   = [...memory.events,   ...eventsByCategory.events]
+  const reinforcement = Math.min(1 + Math.min(mentionCount, MAX_MENTION_COUNT) * 0.1, 2.0)
+
+  const sourceWeightMap = {
+    vet_confirmed: 1.5,
+    user_stated:   1.0,
+    inferred:      0.6,
+  }
+  const sourceWeight = sourceWeightMap[item.source] || 1.0
+
+  return confidence * decay * reinforcement * sourceWeight
+}
+
+function applyDecayFilter(snapshot) {
+  const filterArr = (arr) => {
+    if (!Array.isArray(arr)) return []
+    return arr.filter(item => calcMemoryScore(item) > MEMORY_SCORE_THRESHOLD)
+  }
+
+  return {
+    health:      filterArr(snapshot.health),
+    behavior:    filterArr(snapshot.behavior),
+    diet:        filterArr(snapshot.diet),
+    personality: snapshot.personality || [],
+    updatedAt:   snapshot.updatedAt,
+  }
+}
+
+// ============================================================
+// Phase 3：将三层数据合并为注入用的 memory 对象
+// ============================================================
+function buildLayeredMemory(snapshot, recentEvents, historyEvents) {
+  const memory = {
+    health:        [...(snapshot.health      || [])],
+    behavior:      [...(snapshot.behavior    || [])],
+    diet:          [...(snapshot.diet        || [])],
+    personality:   [...(snapshot.personality || [])],
+    events:        [],
+    recentEvents:  [],
+    historyEvents: [],
+  }
+
+  for (const ev of recentEvents) {
+    memory.recentEvents.push({ content: ev.content, category: ev.category, date: ev.date })
+  }
+
+  for (const ev of historyEvents) {
+    memory.historyEvents.push({ content: ev.content, category: ev.category, date: ev.date })
   }
 
   return memory
 }
 
 // ============================================================
-// 将 memory 构建成背景描述字符串，注入 system prompt
+// Phase 3：主动追问 — 检测缺失字段
 // ============================================================
-function buildMemoryContext(petName, memory) {
-  if (!memory) return ''
+function shouldAskForInfo(snapshot) {
+  if (!snapshot) return null
+
+  const missing = Object.keys(FIELD_WEIGHTS).filter(k => {
+    const val = snapshot[k]
+    return val === undefined || val === null || val === ''
+  })
+
+  if (missing.length === 0) return null
+  if (Math.random() > 0.3) return null
+
+  missing.sort((a, b) => FIELD_WEIGHTS[b].weight - FIELD_WEIGHTS[a].weight)
+  return FIELD_WEIGHTS[missing[0]].label
+}
+
+// ============================================================
+// Phase 3：异步更新被引用事件的 mentionCount（+1）
+// ============================================================
+async function updateMentionCounts(eventIds) {
+  if (!eventIds || eventIds.length === 0) return
+  const db = cloud.database()
+  const tasks = eventIds.map(id =>
+    db.collection('pet_memory_events').doc(id).update({
+      data: { mentionCount: db.command.inc(1) },
+    }).catch(() => {})
+  )
+  await Promise.allSettled(tasks)
+}
+
+// ============================================================
+// Phase 3：分层构建 memory context 注入 system prompt
+// ============================================================
+function buildMemoryContext(petName, memory, askField) {
+  if (!memory) return buildAskFieldSuffix(petName, askField)
 
   const parts = []
 
+  // ── 第一层：核心档案 ──────────────────────────────────
+  const coreLines = []
+
   if (memory.behavior && memory.behavior.length > 0) {
     const items = memory.behavior.map(i => (typeof i === 'string' ? i : i.content)).filter(Boolean)
-    if (items.length) parts.push(`已知行为问题：${items.join('；')}`)
+    if (items.length) coreLines.push(`已知行为问题：${items.slice(0, 3).join('；')}`)
   }
-
   if (memory.personality && memory.personality.length > 0) {
-    parts.push(`性格特点：${memory.personality.join('、')}`)
+    coreLines.push(`性格特点：${memory.personality.join('、')}`)
   }
-
   if (memory.diet && memory.diet.length > 0) {
     const items = memory.diet.map(i => (typeof i === 'string' ? i : i.content)).filter(Boolean)
-    if (items.length) parts.push(`饮食偏好：${items.join('；')}`)
+    if (items.length) coreLines.push(`饮食偏好：${items.slice(0, 3).join('；')}`)
   }
-
   if (memory.health && memory.health.length > 0) {
     const items = memory.health.map(i => (typeof i === 'string' ? i : i.content)).filter(Boolean)
-    if (items.length) parts.push(`健康状况：${items.join('；')}`)
+    if (items.length) coreLines.push(`健康状况：${items.slice(0, 3).join('；')}`)
   }
 
-  if (parts.length === 0) return ''
+  if (coreLines.length > 0) {
+    parts.push(`【核心档案】\n${coreLines.join('\n')}`)
+  }
 
-  return `\n\n【关于${petName}的已知信息】\n${parts.join('\n')}\n请结合以上背景提供针对性的训练方案。`
+  // ── 第二层：近30天动态 ────────────────────────────────
+  if (memory.recentEvents && memory.recentEvents.length > 0) {
+    const recentLines = memory.recentEvents
+      .slice(0, 5)
+      .map(e => `· ${e.date || ''} ${e.content}`.trim())
+    parts.push(`【近期动态（最近30天）】\n${recentLines.join('\n')}`)
+  }
+
+  // ── 第三层：历史归档（按需） ──────────────────────────
+  if (memory.historyEvents && memory.historyEvents.length > 0) {
+    const histLines = memory.historyEvents
+      .slice(0, 8)
+      .map(e => `· ${e.date || ''} ${e.content}`.trim())
+    parts.push(`【历史记录】\n${histLines.join('\n')}`)
+  }
+
+  if (parts.length === 0) return buildAskFieldSuffix(petName, askField)
+
+  let context = `\n\n【关于${petName}的已知信息】\n${parts.join('\n\n')}`
+  context += `\n\n请结合以上背景提供针对性的训练方案。`
+  context += buildAskFieldSuffix(petName, askField)
+
+  return context
+}
+
+function buildAskFieldSuffix(petName, askField) {
+  if (!askField) return ''
+  return `\n\n【追问指令】在本次回复末尾，以自然口吻顺带问一下主人：「顺便想了解一下，${petName}的${askField}是多少呢？记录下来方便给出更准确的建议～」请一定要加上，语气轻松自然。`
 }
 
 // ============================================================
 // 调用 MiniMax Chat Completion V2（支持多轮对话）
 // ============================================================
-function callMinimaxTrainer(userMessages, petName, petType, memory) {
+function callMinimaxTrainer(userMessages, petName, petType, memory, askField) {
   return new Promise((resolve, reject) => {
     const apiKey = process.env.MINIMAX_API_KEY
     if (!apiKey) {
@@ -197,8 +350,8 @@ function callMinimaxTrainer(userMessages, petName, petType, memory) {
     const petTypeText = petType === 'cat' ? '猫咪' : '狗狗'
     const petDesc = petName ? `主人的${petTypeText}叫 ${petName}` : `主人养了一只${petTypeText}`
 
-    // 注入宠物记忆背景
-    const memoryContext = buildMemoryContext(petName || '这只宠物', memory)
+    // Phase 3：分层注入记忆背景 + 追问指令
+    const memoryContext = buildMemoryContext(petName || '这只宠物', memory, askField)
 
     const systemPrompt = `你是一位专业、耐心的宠物行为训练师，熟悉犬猫行为学和正向强化训练方法。
 ${petDesc}。${memoryContext}

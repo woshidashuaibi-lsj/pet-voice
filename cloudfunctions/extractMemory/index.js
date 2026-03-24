@@ -198,7 +198,10 @@ function mergeSnapshot(existing, filtered, now) {
         const eStr = typeof e === 'string' ? e : e.content
         return isSimilar(eStr, item.content)
       })
-      if (!isDup) result.push(item)
+      if (!isDup) {
+        // 记录写入时间，供 Phase 3 记忆衰减计算使用
+        result.push({ ...item, createdAt: now })
+      }
     }
     // snapshot 每个维度最多保留最新的 10 条，防止无限增长
     return result.slice(-10)
@@ -240,12 +243,13 @@ async function appendEvents(petId, filtered, source) {
     db.collection('pet_memory_events').add({
       data: {
         petId,
-        content:    item.content,
-        category:   item.category,
-        confidence: item.confidence,
-        date:       item.date,
-        source:     item.source || source,
-        createdAt:  db.serverDate(),
+        content:      item.content,
+        category:     item.category,
+        confidence:   item.confidence,
+        date:         item.date,
+        source:       item.source || source,
+        mentionCount: 0,           // Phase 3：被引用次数，每次注入 prompt 时 +1
+        createdAt:    db.serverDate(),
       },
     })
   )
