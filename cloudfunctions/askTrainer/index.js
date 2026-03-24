@@ -36,8 +36,11 @@ exports.main = async (event) => {
   }
 
   try {
-    // 读取宠物记忆档案
-    const memory = await loadPetMemory(petId)
+    // 取最后一条用户消息，用于检测是否在询问历史
+    const lastUserMsg = [...finalMessages].reverse().find(m => m.role === 'user')?.content || ''
+
+    // 读取宠物记忆档案（Phase 2：优先读 snapshot，按需查 events）
+    const memory = await loadPetMemory(petId, lastUserMsg)
 
     const reply = await callMinimaxTrainer(finalMessages, petName, petType, memory)
     return { success: true, reply }
@@ -52,25 +55,100 @@ exports.main = async (event) => {
 }
 
 // ============================================================
-// 从数据库读取宠物记忆档案
+// 从数据库读取宠物记忆档案（Phase 2 双轨读取）
+// 优先读 pet_memory_snapshot（快照），
+// 用户提问中含历史关键词时额外查 pet_memory_events（事件流）
+// 兼容旧版 pets.memory 字段
 // ============================================================
-async function loadPetMemory(petId) {
+async function loadPetMemory(petId, userQuestion) {
   try {
     const db = cloud.database()
-    let petDoc = null
 
-    if (petId) {
-      const res = await db.collection('pets').doc(petId).get()
-      petDoc = res.data
-    } else {
+    // Step 1：解析 petId（有则用，无则查第一只）
+    let resolvedPetId = petId
+    if (!resolvedPetId) {
       const res = await db.collection('pets').limit(1).get()
-      petDoc = res.data[0] || null
+      resolvedPetId = res.data[0]?._id || null
+    }
+    if (!resolvedPetId) return null
+
+    // Step 2：读取 snapshot（日常对话只用这个）
+    let snapshot = null
+    try {
+      const snapRes = await db.collection('pet_memory_snapshot')
+        .where({ petId: resolvedPetId })
+        .limit(1)
+        .get()
+      snapshot = snapRes.data[0] || null
+    } catch (e) {
+      // snapshot 集合不存在，降级读旧版 pets.memory
     }
 
-    return petDoc?.memory || null
+    // snapshot 集合不存在时，降级读旧版 pets.memory
+    if (!snapshot) {
+      try {
+        const petRes = await db.collection('pets').doc(resolvedPetId).get()
+        const legacyMemory = petRes.data?.memory || null
+        if (legacyMemory) {
+          console.log('[askTrainer] 降级使用 pets.memory（旧版）')
+          return legacyMemory
+        }
+      } catch (e) {
+        // 忽略
+      }
+      return null
+    }
+
+    // Step 3：检测用户是否在询问历史，按需加载 events
+    const isAskingHistory = /以前|历史|之前|过去|曾经|以往|什么时候|多久/.test(userQuestion || '')
+    let historyEvents = []
+
+    if (isAskingHistory) {
+      try {
+        const eventsRes = await db.collection('pet_memory_events')
+          .where({ petId: resolvedPetId })
+          .orderBy('createdAt', 'desc')
+          .limit(20)
+          .get()
+        historyEvents = eventsRes.data || []
+        console.log('[askTrainer] 按需加载历史事件:', historyEvents.length, '条')
+      } catch (e) {
+        // events 查询失败，不影响正常对话
+      }
+    }
+
+    // 将 snapshot + events 合并成统一结构返回
+    return buildMemoryFromDualTrack(snapshot, historyEvents)
+
   } catch (e) {
+    console.log('[askTrainer] loadPetMemory 失败，跳过记忆注入:', e.message)
     return null
   }
+}
+
+// 将双轨数据合并成统一的 memory 对象（与 buildMemoryContext 兼容）
+function buildMemoryFromDualTrack(snapshot, historyEvents) {
+  const memory = {
+    health:      snapshot.health      || [],
+    behavior:    snapshot.behavior    || [],
+    diet:        snapshot.diet        || [],
+    personality: snapshot.personality || [],
+    events:      snapshot.events      || [],
+  }
+
+  if (historyEvents.length > 0) {
+    const eventsByCategory = {}
+    for (const ev of historyEvents) {
+      if (!eventsByCategory[ev.category]) eventsByCategory[ev.category] = []
+      eventsByCategory[ev.category].push({ content: ev.content, date: ev.date })
+    }
+    if (eventsByCategory.health)   memory.health   = [...memory.health,   ...eventsByCategory.health]
+    if (eventsByCategory.behavior) memory.behavior = [...memory.behavior, ...eventsByCategory.behavior]
+    if (eventsByCategory.diet)     memory.diet     = [...memory.diet,     ...eventsByCategory.diet]
+    if (eventsByCategory.events)   memory.events   = [...memory.events,   ...eventsByCategory.events]
+  }
+
+  return memory
 }
 
 // ============================================================
