@@ -7,12 +7,12 @@
     <text class="nav-title-sm">🎓 宠物训练</text>
     <view style="width:80rpx;"></view>
   </view>
-  <!-- AI 训练师入口横幅 -->
+  <!-- 训练顾问入口横幅 -->
   <view class="ask-banner" bindtap="goAskTrainer">
     <view class="ask-banner-left">
       <text class="ask-banner-icon">🤖</text>
       <view>
-        <text class="ask-banner-title">智能训练师</text>
+        <text class="ask-banner-title">宠物训练顾问</text>
         <text class="ask-banner-sub">描述问题，获取专属训练方案</text>
       </view>
     </view>
@@ -106,9 +106,9 @@
             <text class="tip-text">{{t}}</text>
           </view>
         </view>
-        <!-- 底部 AI 入口 -->
+        <!-- 底部顾问入口 -->
         <!-- <view class="detail-ask-btn" bindtap="goAskTrainerWithTopic">
-          <text>🤖 遇到问题？让智能训练师帮你</text>
+          <text>🤖 遇到问题？让宠物训练顾问帮你</text>
         </view> -->
       </scroll-view>
     </view>

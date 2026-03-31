@@ -220,7 +220,7 @@
                             <view class="memory-item-left">
                                 <!-- 来源标签 -->
                                 <view class="memory-source-tag source-{{mem.source === 'user_correction' ? 'correction' : (mem.source === 'user_stated' ? 'stated' : (mem.source === 'vet_confirmed' ? 'vet' : 'ai'))}}">
-                                    {{mem.source === 'user_correction' ? '已矫正' : (mem.source === 'user_stated' ? '手动添加' : (mem.source === 'vet_confirmed' ? '医生确认' : 'AI提取'))}}
+                                    {{mem.source === 'user_correction' ? '已矫正' : (mem.source === 'user_stated' ? '手动添加' : (mem.source === 'vet_confirmed' ? '医生确认' : '自动提取'))}}
                                 </view>
                                 <text class="memory-content">{{mem.content}}</text>
                             </view>

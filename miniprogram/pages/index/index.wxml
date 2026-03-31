@@ -88,7 +88,7 @@
             <view class="func-card-icon">💊</view>
             <view class="func-card-info">
               <text class="func-card-title">健康</text>
-              <text class="func-card-desc">智能问诊</text>
+              <text class="func-card-desc">健康咨询</text>
             </view>
           </navigator>
 

@@ -9,7 +9,7 @@
     </view>
   </view>
 
-  <!-- AI Tab -->
+  <!-- 助手 Tab -->
   <view class="tab-item" bindtap="onTap" data-index="1" data-path="/pages/ai/index">
     <view class="tab-pill {{selected === 1 ? 'pill-active' : ''}}">
       <text class="icon-emoji {{selected === 1 ? 'emoji-active' : ''}}">🤖</text>

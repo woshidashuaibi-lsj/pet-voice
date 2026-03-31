@@ -31,7 +31,7 @@
   color: var(--color-text);
 }
 
-/* ---- AI 训练师横幅 ---- */
+/* ---- 训练顾问横幅 ---- */
 .ask-banner {
   margin: 24rpx 32rpx 28rpx;
   background: linear-gradient(135deg, #FF9F43 0%, #FF7F30 100%);
@@ -501,7 +501,7 @@
   color: var(--color-text);
 }
 
-/* 底部 AI 入口按钮 */
+/* 底部顾问入口按钮 */
 .detail-ask-btn {
   background: linear-gradient(135deg, #FF9F43 0%, #FF7F30 100%);
   border-radius: 48rpx;

@@ -10,13 +10,13 @@
     <view style="width:100rpx;"></view>
   </view>
 
-  <!-- AI 问诊入口横幅 -->
+  <!-- 健康咨询入口横幅 -->
   <view class="ask-banner" bindtap="goAskVet">
     <view class="ask-banner-left">
       <text class="ask-banner-icon">🩺</text>
       <view>
-        <text class="ask-banner-title">智能宠物问诊</text>
-        <text class="ask-banner-sub">描述症状，秒获专业建议</text>
+        <text class="ask-banner-title">宠物健康咨询</text>
+        <text class="ask-banner-sub">描述症状，快速获取专业建议</text>
       </view>
     </view>
     <text class="ask-banner-arrow">→</text>

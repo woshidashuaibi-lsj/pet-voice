@@ -35,7 +35,7 @@
   flex: 1;
 }
 
-/* ---- AI 问诊横幅 ---- */
+/* ---- 健康咨询横幅 ---- */
 .ask-banner {
   margin: 20rpx 28rpx 0;
   background: linear-gradient(135deg, #FF9F43, #FF7043);
