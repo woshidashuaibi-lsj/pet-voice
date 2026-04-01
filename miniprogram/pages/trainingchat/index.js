@@ -3,6 +3,20 @@ const app = getApp()
 
 const TYPEWRITER_SPEED = 30  // 每字间隔 ms
 
+// 从云数据库读取功能开关（集合：appConfig，文档字段：chatEnabled）
+async function fetchChatEnabled() {
+  try {
+    const db = wx.cloud.database()
+    const res = await db.collection('appConfig').where({ key: 'featureFlags' }).limit(1).get()
+    if (res.data && res.data.length > 0) {
+      return res.data[0].chatEnabled === true
+    }
+    return false // 默认关闭，文档不存在时也关闭
+  } catch (e) {
+    return false // 出错时默认关闭，保守策略
+  }
+}
+
 // 方案二：摘要压缩阈值
 const COMPRESS_THRESHOLD = 1500
 const KEEP_RECENT        = 6
@@ -19,6 +33,7 @@ Page({
     petName: '',         // 新增：宠物名称
     petType: 'dog',
     petId: '',           // 新增：宠物文档 _id，用于精准读写 memory
+    chatEnabled: null,   // null=加载中，true=开启，false=关闭
     quickQuestions: [
       '怎么训练狗狗坐下？',
       '猫咪抓家具怎么纠正？',
@@ -32,11 +47,17 @@ Page({
   _typewriterTimer: null,
   _isTyping: false,
 
-  onLoad(options) {
+  async onLoad(options) {
     this.setData({
       statusBarHeight: app.globalData.statusBarHeight || 0,
       navBarHeight:    app.globalData.navBarHeight || 44,
     })
+
+    // 先检查功能开关
+    const enabled = await fetchChatEnabled()
+    this.setData({ chatEnabled: enabled })
+
+    if (!enabled) return  // 功能关闭，不加载宠物信息、不发消息
 
     // 从数据库加载宠物信息（含 petId）
     this._loadPetInfo()

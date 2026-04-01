@@ -4,6 +4,20 @@ const app = getApp()
 let msgIdCounter = 0
 function nextId() { return ++msgIdCounter }
 
+// 从云数据库读取功能开关（集合：appConfig，文档字段：chatEnabled）
+async function fetchChatEnabled() {
+  try {
+    const db = wx.cloud.database()
+    const res = await db.collection('appConfig').where({ key: 'featureFlags' }).limit(1).get()
+    if (res.data && res.data.length > 0) {
+      return res.data[0].chatEnabled === true
+    }
+    return false // 默认关闭，文档不存在时也关闭
+  } catch (e) {
+    return false // 出错时默认关闭，保守策略
+  }
+}
+
 // 快捷问题列表
 const QUICK_QUESTIONS = [
   '猫咪突然不吃饭是怎么回事？',
@@ -35,17 +49,27 @@ Page({
     navBarHeight: 44,
     quickQuestions: QUICK_QUESTIONS,
     topicTitle: '',
+    chatEnabled: null,   // null=加载中，true=开启，false=关闭
   },
 
   // 保存打字机 timer，用于页面卸载时清除
   _typewriterTimer: null,
   _isTyping: false,
+  // 暂存 onLoad 参数，等开关检查完再执行
+  _pendingOptions: null,
 
-  onLoad(options) {
+  async onLoad(options) {
     this.setData({
       statusBarHeight: app.globalData.statusBarHeight,
       navBarHeight:    app.globalData.navBarHeight,
     })
+
+    // 先检查功能开关
+    const enabled = await fetchChatEnabled()
+    this.setData({ chatEnabled: enabled })
+
+    if (!enabled) return  // 功能关闭，不加载宠物信息、不发消息
+
     this._loadPetInfo()
 
     if (options.topic) {

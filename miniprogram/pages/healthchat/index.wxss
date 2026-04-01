@@ -341,3 +341,43 @@
   font-weight: 700;
   line-height: 1;
 }
+
+/* ---- 功能未开放占位页 ---- */
+.feature-closed-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 70vh;
+  padding: 0 60rpx;
+}
+
+.fc-icon {
+  font-size: 100rpx;
+  margin-bottom: 32rpx;
+}
+
+.fc-title {
+  font-size: 36rpx;
+  font-weight: 700;
+  color: #333;
+  margin-bottom: 16rpx;
+}
+
+.fc-desc {
+  font-size: 28rpx;
+  color: #999;
+  text-align: center;
+  line-height: 1.6;
+  margin-bottom: 60rpx;
+}
+
+.fc-back-btn {
+  background: #FF9F43;
+  color: #fff;
+  font-size: 30rpx;
+  font-weight: 600;
+  padding: 22rpx 72rpx;
+  border-radius: 50rpx;
+  box-shadow: 0 6rpx 20rpx rgba(255, 159, 67, 0.35);
+}
