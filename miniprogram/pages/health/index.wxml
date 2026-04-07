@@ -10,8 +10,8 @@
     <view style="width:100rpx;"></view>
   </view>
 
-  <!-- 健康咨询入口横幅 -->
-  <view class="ask-banner" bindtap="goAskVet">
+  <!-- 健康咨询入口横幅（由云端 aiEnabled 字段控制是否展示） -->
+  <view wx:if="{{aiVisible}}" class="ask-banner" bindtap="goAskVet">
     <view class="ask-banner-left">
       <text class="ask-banner-icon">🩺</text>
       <view>

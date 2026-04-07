@@ -7,8 +7,8 @@
     <text class="nav-title-sm">🎓 宠物训练</text>
     <view style="width:80rpx;"></view>
   </view>
-  <!-- 训练顾问入口横幅 -->
-  <view class="ask-banner" bindtap="goAskTrainer">
+  <!-- 训练顾问入口横幅（由云端 aiEnabled 字段控制是否展示） -->
+  <view wx:if="{{aiVisible}}" class="ask-banner" bindtap="goAskTrainer">
     <view class="ask-banner-left">
       <text class="ask-banner-icon">🤖</text>
       <view>

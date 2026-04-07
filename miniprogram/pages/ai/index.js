@@ -47,10 +47,33 @@ Page({
   },
 
   onShow() {
-    // 同步自定义 tabBar 高亮（AI index = 1）
-    if (typeof this.getTabBar === 'function' && this.getTabBar()) {
-      this.getTabBar().setSelected(1)
-    }
+    // 检查云端开关，未开放则直接跳回首页（防止提审时被看出 AI 功能）
+    this._checkAiEnabled(() => {
+      // 开放时才同步 tabBar 高亮
+      if (typeof this.getTabBar === 'function' && this.getTabBar()) {
+        this.getTabBar().setSelected(1)
+      }
+    })
+  },
+
+  // 检测 AI 功能是否开放
+  _checkAiEnabled(onEnabled) {
+    const db = wx.cloud.database()
+    db.collection('config').where({ key: 'aiEnabled' }).limit(1).get({
+      success: (res) => {
+        const enabled = res.data && res.data.length > 0 && !!res.data[0].value
+        if (!enabled) {
+          // 未开放，静默跳回首页
+          wx.switchTab({ url: '/pages/index/index' })
+        } else {
+          onEnabled && onEnabled()
+        }
+      },
+      fail: () => {
+        // 查询失败也跳回首页，保守处理
+        wx.switchTab({ url: '/pages/index/index' })
+      }
+    })
   },
 
   // 跳转到专属服务

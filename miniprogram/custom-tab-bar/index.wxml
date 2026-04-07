@@ -9,8 +9,8 @@
     </view>
   </view>
 
-  <!-- 助手 Tab -->
-  <view class="tab-item" bindtap="onTap" data-index="1" data-path="/pages/ai/index">
+  <!-- 助手 Tab（由云端 aiEnabled 字段控制是否展示） -->
+  <view wx:if="{{aiTabVisible}}" class="tab-item" bindtap="onTap" data-index="1" data-path="/pages/ai/index">
     <view class="tab-pill {{selected === 1 ? 'pill-active' : ''}}">
       <text class="icon-emoji {{selected === 1 ? 'emoji-active' : ''}}">🤖</text>
       <text class="tab-label {{selected === 1 ? 'label-active' : ''}}">助手</text>

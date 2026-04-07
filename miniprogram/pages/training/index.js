@@ -215,6 +215,7 @@ Page({
     currentItem: null,
     statusBarHeight: 0,
     navBarHeight: 44,
+    aiVisible: false, // 由云端 aiEnabled 字段控制 AI 入口是否展示
   },
 
   onLoad() {
@@ -223,6 +224,21 @@ Page({
       navBarHeight:    app.globalData.navBarHeight,
     })
     this._filterList()
+    this._loadAiConfig()
+  },
+
+  // 从云数据库读取 AI 功能开关
+  _loadAiConfig() {
+    const db = wx.cloud.database()
+    db.collection('config').where({ key: 'aiEnabled' }).limit(1).get({
+      success: (res) => {
+        const enabled = res.data && res.data.length > 0 && !!res.data[0].value
+        this.setData({ aiVisible: enabled })
+      },
+      fail: () => {
+        this.setData({ aiVisible: false })
+      }
+    })
   },
 
   switchTab(e) {
