@@ -1,0 +1,9 @@
+{
+  "name": "updateAvatarState",
+  "version": "1.0.0",
+  "description": "更新宠物分身四维数据",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

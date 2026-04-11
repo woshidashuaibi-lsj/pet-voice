@@ -74,6 +74,16 @@
             <text class="info-cell-val age-val">{{petAge}}</text>
           </view>
         </view>
+
+        <!-- 宠物分身入口 -->
+        <navigator url="/pages/avatar/index" class="avatar-entry-btn" hover-class="avatar-entry-btn-hover">
+          <text class="avatar-entry-btn-icon">✨</text>
+          <view class="avatar-entry-btn-info">
+            <text class="avatar-entry-btn-title">查看宠物分身</text>
+            <text class="avatar-entry-btn-sub">互动・进化・养成</text>
+          </view>
+          <text class="avatar-entry-btn-arrow">→</text>
+        </navigator>
       </view>
 
       <!-- 未创建宠物档案 -->

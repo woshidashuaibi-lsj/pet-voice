@@ -12,7 +12,8 @@
     "pages/trainingchat/index",
     "pages/guide/index",
     "pages/petbook/index",
-    "pages/ai/index"
+    "pages/ai/index",
+    "pages/avatar/index"
   ],
   "tabBar": {
     "custom": true,
@@ -47,11 +48,6 @@
     "navigationBarTitleText": "毛孩子翻译官",
     "navigationBarTextStyle": "black",
     "backgroundColor": "#FFF9F0"
-  },
-  "permission": {
-    "scope.record": {
-      "desc": "用于录制宠物叫声，进行情绪分析"
-    }
   },
   "sitemapLocation": "sitemap.json",
   "lazyCodeLoading": "requiredComponents"

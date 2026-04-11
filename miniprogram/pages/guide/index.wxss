@@ -237,6 +237,7 @@
 
 .detail-body {
   flex: 1;
+  height: 0;          /* 配合 flex:1 让 scroll-view 能正确计算高度 */
   padding: 28rpx 32rpx 48rpx;
 }
 

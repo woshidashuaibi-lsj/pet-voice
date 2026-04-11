@@ -1,0 +1,9 @@
+{
+  "name": "recordInteraction",
+  "version": "1.0.0",
+  "description": "记录宠物分身交互并更新维度",
+  "main": "index.js",
+  "dependencies": {
+    "wx-server-sdk": "~2.6.3"
+  }
+}

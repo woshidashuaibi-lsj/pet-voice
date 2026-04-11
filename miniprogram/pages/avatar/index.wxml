@@ -1,0 +1,203 @@
+<!-- pages/avatar/index.wxml -->
+<view class="page">
+  <!-- 状态栏占位 -->
+  <view style="height: {{statusBarHeight}}px;"></view>
+
+  <!-- 顶部导航栏 -->
+  <view class="nav-bar" style="height: {{navBarHeight}}px;">
+    <navigator open-type="navigateBack" class="nav-back">← 返回</navigator>
+    <text class="nav-title">✨ 宠物分身</text>
+    <view style="width:100rpx;"></view>
+  </view>
+
+  <!-- 加载中 -->
+  <view class="loading-wrap" wx:if="{{loading}}">
+    <view class="loading-paw">🐾</view>
+    <text class="loading-tip">宠物正在赶来…</text>
+  </view>
+
+  <!-- 主内容 -->
+  <scroll-view scroll-y class="main-scroll" wx:else>
+
+    <!-- 宠物名片 -->
+    <view class="pet-namecard">
+      <text class="pet-name">{{petName || '我的宠物'}}</text>
+      <view class="level-badge">
+        <text class="level-star">⭐</text>
+        <text class="level-text">Lv.{{appearance.level}} {{appearance.levelLabel}}</text>
+      </view>
+    </view>
+
+    <!-- ===== 宠物舞台区域 ===== -->
+    <view class="stage-wrap">
+      <!-- 背景装饰 -->
+      <view class="stage-bg mood-{{moodSegment}}">
+        <view class="stage-cloud cloud-l">☁️</view>
+        <view class="stage-cloud cloud-r">☁️</view>
+        <view class="stage-ground"></view>
+      </view>
+
+      <!-- 宠物主体（可点击交互） -->
+      <view
+        class="pet-body {{currentAnim}} {{isNight ? 'night-mode' : ''}}"
+        id="pet-model"
+        bindtap="onTap"
+        bindlongpress="onLongPress"
+        catchtouchstart="onTouchStart"
+        catchtouchend="onTouchEnd"
+      >
+        <!-- 特效层（心形、光晕等） -->
+        <view class="effect-layer" wx:if="{{showEffect}}">
+          <view class="effect-{{effectType}}">
+            <text wx:if="{{effectType === 'hearts'}}">💕</text>
+            <text wx:if="{{effectType === 'hearts'}}">💖</text>
+            <text wx:if="{{effectType === 'glow'}}">✨</text>
+            <text wx:if="{{effectType === 'glow'}}">⭐</text>
+          </view>
+        </view>
+
+        <!-- 宠物 Emoji 模型 -->
+        <view class="pet-model-wrap">
+          <!-- 情绪光环（心情很好时才显示） -->
+          <view class="mood-halo" wx:if="{{moodSegment === 'very_happy'}}"></view>
+
+          <!-- 主体 Emoji -->
+          <text class="pet-emoji {{currentAnim === 'anim-sleep' ? 'emoji-sleep' : ''}}">
+            {{petEmoji}}
+          </text>
+
+          <!-- 睡眠时的 ZZZ -->
+          <view class="sleep-zzz" wx:if="{{currentAnim === 'anim-sleep'}}">
+            <text class="zzz">z</text>
+            <text class="zzz zzz-2">z</text>
+            <text class="zzz zzz-3">Z</text>
+          </view>
+
+          <!-- 夜间月亮 -->
+          <view class="night-moon" wx:if="{{isNight && currentAnim === 'anim-sleep'}}">🌙</view>
+        </view>
+
+        <!-- 对话气泡 -->
+        <view class="dialog-bubble {{showDialog ? 'bubble-show' : 'bubble-hide'}}">
+          <text class="dialog-text">{{dialogText}}</text>
+          <view class="bubble-tail"></view>
+        </view>
+      </view>
+
+      <!-- 浮起的维度变化数字 -->
+      <view class="float-number {{showFloatNum ? 'float-show' : 'float-hide'}}">
+        <text>{{floatNumText}}</text>
+      </view>
+
+      <!-- 点击热区提示（调试时可开启） -->
+      <!-- <view class="hotzone-debug">{{lastTapZone}}</view> -->
+    </view>
+
+    <!-- ===== 四维数据条 ===== -->
+    <view class="dims-section">
+      <view class="dims-row">
+
+        <view class="dim-item">
+          <view class="dim-header">
+            <text class="dim-icon">❤️</text>
+            <text class="dim-label">满足</text>
+            <text class="dim-value">{{dimensions.contentment}}</text>
+          </view>
+          <view class="dim-bar-bg">
+            <view class="dim-bar-fill {{dimColors.contentment}}"
+              style="width: {{dimensions.contentment}}%;"></view>
+          </view>
+        </view>
+
+        <view class="dim-item">
+          <view class="dim-header">
+            <text class="dim-icon">⚡</text>
+            <text class="dim-label">精力</text>
+            <text class="dim-value">{{dimensions.energy}}</text>
+          </view>
+          <view class="dim-bar-bg">
+            <view class="dim-bar-fill {{dimColors.energy}}"
+              style="width: {{dimensions.energy}}%;"></view>
+          </view>
+        </view>
+
+      </view>
+      <view class="dims-row">
+
+        <view class="dim-item">
+          <view class="dim-header">
+            <text class="dim-icon">💞</text>
+            <text class="dim-label">亲密</text>
+            <text class="dim-value">{{dimensions.affection}}</text>
+          </view>
+          <view class="dim-bar-bg">
+            <view class="dim-bar-fill {{dimColors.affection}}"
+              style="width: {{dimensions.affection}}%;"></view>
+          </view>
+        </view>
+
+        <view class="dim-item">
+          <view class="dim-header">
+            <text class="dim-icon">🏥</text>
+            <text class="dim-label">健康</text>
+            <text class="dim-value">{{dimensions.health}}</text>
+          </view>
+          <view class="dim-bar-bg">
+            <view class="dim-bar-fill {{dimColors.health}}"
+              style="width: {{dimensions.health}}%;"></view>
+          </view>
+        </view>
+
+      </view>
+    </view>
+
+    <!-- ===== 进化等级进度条 ===== -->
+    <view class="evolution-section">
+      <view class="evo-header">
+        <text class="evo-title">📊 进化进度</text>
+        <text class="evo-count">对话 {{stats.totalConversations}} 轮</text>
+      </view>
+      <view class="evo-bar-bg">
+        <view class="evo-bar-fill" style="width: {{levelProgress}}%;"></view>
+      </view>
+      <view class="evo-info-row">
+        <text class="evo-current">Lv.{{appearance.level}} {{appearance.levelLabel}}</text>
+        <text class="evo-next" wx:if="{{appearance.level < 5}}">
+          下一级还需 {{nextLevelConvs}} 轮对话
+        </text>
+        <text class="evo-next" wx:else>🏆 已达最高等级！</text>
+      </view>
+    </view>
+
+    <!-- ===== 互动提示区 ===== -->
+    <view class="hint-section">
+      <view class="hint-card">
+        <text class="hint-icon">💡</text>
+        <text class="hint-text">点击、双击或长按宠物，它会有不同反应哦～</text>
+      </view>
+    </view>
+
+    <!-- ===== 性格标签 ===== -->
+    <view class="traits-section" wx:if="{{personality.primaryTraits.length > 0}}">
+      <text class="traits-title">🌟 性格标签</text>
+      <view class="traits-row">
+        <view wx:for="{{personality.primaryTraits}}" wx:key="*this" class="trait-tag">
+          {{item}}
+        </view>
+      </view>
+    </view>
+
+    <!-- ===== 升级提示弹窗 ===== -->
+    <view class="levelup-mask" wx:if="{{showLevelUp}}" bindtap="closeLevelUp">
+      <view class="levelup-card" catchtap="noop">
+        <text class="levelup-emoji">🎉</text>
+        <text class="levelup-title">进化升级！</text>
+        <text class="levelup-desc">{{petName}} 升到了 Lv.{{appearance.level}}「{{appearance.levelLabel}}」</text>
+        <text class="levelup-unlock">✨ 解锁了新的互动动作</text>
+        <view class="levelup-btn" bindtap="closeLevelUp">太棒了！</view>
+      </view>
+    </view>
+
+    <view style="height: 60rpx;"></view>
+  </scroll-view>
+</view>

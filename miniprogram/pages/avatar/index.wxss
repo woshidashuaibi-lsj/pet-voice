@@ -1,0 +1,749 @@
+/* pages/avatar/index.wxss */
+
+.page {
+  background: linear-gradient(180deg, #FFF9F0 0%, #FFF5E6 100%);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* ---- 导航栏 ---- */
+.nav-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 28rpx;
+  background: linear-gradient(180deg, rgba(255,249,240,0.98) 0%, rgba(255,245,230,0.95) 100%);
+  border-bottom: 1rpx solid rgba(255, 159, 67, 0.12);
+  flex-shrink: 0;
+}
+
+.nav-back {
+  font-size: 28rpx;
+  color: var(--color-primary);
+  padding: 10rpx 0;
+  min-width: 100rpx;
+}
+
+.nav-title {
+  font-size: 34rpx;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+/* ---- 主滚动区 ---- */
+.main-scroll {
+  flex: 1;
+}
+
+/* ---- 加载中 ---- */
+.loading-wrap {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding-top: 200rpx;
+}
+
+.loading-paw {
+  font-size: 80rpx;
+  animation: bounce 1s ease-in-out infinite;
+  margin-bottom: 24rpx;
+}
+
+@keyframes bounce {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-20rpx); }
+}
+
+.loading-tip {
+  font-size: 28rpx;
+  color: var(--color-gray);
+}
+
+/* ---- 宠物名片 ---- */
+.pet-namecard {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 24rpx 32rpx 0;
+}
+
+.pet-name {
+  font-size: 40rpx;
+  font-weight: 800;
+  color: var(--color-text);
+}
+
+.level-badge {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  background: linear-gradient(135deg, #FFF5E6 0%, #FFE8C8 100%);
+  border: 2rpx solid rgba(255, 159, 67, 0.3);
+  border-radius: 40rpx;
+  padding: 10rpx 24rpx;
+}
+
+.level-star {
+  font-size: 24rpx;
+}
+
+.level-text {
+  font-size: 24rpx;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+/* ===== 宠物舞台 ===== */
+.stage-wrap {
+  position: relative;
+  height: 460rpx;
+  margin: 20rpx 24rpx 0;
+  border-radius: 36rpx;
+  overflow: hidden;
+}
+
+/* 背景：根据 moodSegment 变化 */
+.stage-bg {
+  position: absolute;
+  inset: 0;
+  border-radius: 36rpx;
+  transition: background 1s ease;
+}
+
+.mood-very_sad  .stage-bg,
+.stage-bg.mood-very_sad  { background: linear-gradient(180deg, #C5C5C5 0%, #8E8E8E 100%); }
+.stage-bg.mood-sad       { background: linear-gradient(180deg, #D0D4D8 0%, #A8AFBB 100%); }
+.stage-bg.mood-neutral   { background: linear-gradient(180deg, #C8E6F5 0%, #A0D0EC 100%); }
+.stage-bg.mood-happy     { background: linear-gradient(180deg, #87CEEB 0%, #ADD8E6 100%); }
+.stage-bg.mood-very_happy{ background: linear-gradient(180deg, #70C4FF 0%, #FFD580 100%); }
+
+.stage-cloud {
+  position: absolute;
+  font-size: 64rpx;
+  opacity: 0.55;
+  animation: float-cloud 5s ease-in-out infinite;
+}
+
+.cloud-l { top: 30rpx; left: 24rpx; animation-delay: 0s; }
+.cloud-r { top: 50rpx; right: 32rpx; animation-delay: 2s; }
+
+@keyframes float-cloud {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(-12rpx); }
+}
+
+.stage-ground {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 80rpx;
+  background: linear-gradient(0deg, rgba(255,220,150,0.5) 0%, transparent 100%);
+  border-radius: 0 0 36rpx 36rpx;
+}
+
+/* ---- 宠物主体 ---- */
+.pet-body {
+  position: absolute;
+  bottom: 60rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 260rpx;
+  height: 260rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+}
+
+.pet-model-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.pet-emoji {
+  font-size: 180rpx;
+  line-height: 1;
+  display: block;
+  filter: drop-shadow(0 8rpx 16rpx rgba(0,0,0,0.12));
+  transition: transform 0.2s ease;
+}
+
+/* ===== 动画系统 ===== */
+
+/* idle - 轻微漂浮 */
+.anim-idle .pet-emoji {
+  animation: anim-idle 3s ease-in-out infinite;
+}
+@keyframes anim-idle {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  30%       { transform: translateY(-10rpx) rotate(-2deg); }
+  70%       { transform: translateY(-8rpx) rotate(2deg); }
+}
+
+/* happy - 跳跃 */
+.anim-happy .pet-emoji {
+  animation: anim-happy 0.6s ease-in-out 3;
+}
+@keyframes anim-happy {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50%       { transform: translateY(-30rpx) scale(1.1); }
+}
+
+/* curious - 歪头 */
+.anim-curious .pet-emoji {
+  animation: anim-curious 0.5s ease-in-out 2;
+}
+@keyframes anim-curious {
+  0%, 100% { transform: rotate(0deg); }
+  40%       { transform: rotate(-15deg) translateX(-8rpx); }
+  80%       { transform: rotate(10deg) translateX(6rpx); }
+}
+
+/* playful - 翻转跳跃 */
+.anim-playful .pet-emoji {
+  animation: anim-playful 0.8s ease-in-out 2;
+}
+@keyframes anim-playful {
+  0%   { transform: translateY(0) rotate(0deg); }
+  25%  { transform: translateY(-24rpx) rotate(-10deg); }
+  50%  { transform: translateY(-16rpx) rotate(10deg); }
+  75%  { transform: translateY(-8rpx) rotate(-5deg); }
+  100% { transform: translateY(0) rotate(0deg); }
+}
+
+/* pet（被摸） - 眯眼缩放 */
+.anim-pet .pet-emoji {
+  animation: anim-pet 0.6s ease-in-out 2;
+}
+@keyframes anim-pet {
+  0%, 100% { transform: scale(1); }
+  50%       { transform: scale(0.92) translateY(4rpx); }
+}
+
+/* excited - 快速跳跃 */
+.anim-excited .pet-emoji {
+  animation: anim-excited 0.4s ease-in-out 4;
+}
+@keyframes anim-excited {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50%       { transform: translateY(-40rpx) scale(1.15); }
+}
+
+/* affectionate（亲昵）- 左右蹭 */
+.anim-affectionate .pet-emoji {
+  animation: anim-affectionate 0.5s ease-in-out 3;
+}
+@keyframes anim-affectionate {
+  0%, 100% { transform: translateX(0); }
+  30%       { transform: translateX(-16rpx) rotate(-5deg); }
+  70%       { transform: translateX(16rpx) rotate(5deg); }
+}
+
+/* sleepy/sleep - 缓慢下沉 */
+.anim-sleepy .pet-emoji,
+.anim-sleep .pet-emoji {
+  animation: anim-sleep 3s ease-in-out infinite;
+}
+@keyframes anim-sleep {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  50%       { transform: translateY(8rpx) rotate(3deg); }
+}
+
+/* sad - 低头 */
+.anim-sad .pet-emoji {
+  animation: anim-sad 1s ease-in-out 2;
+}
+@keyframes anim-sad {
+  0%, 100% { transform: translateY(0) scale(1); }
+  50%       { transform: translateY(6rpx) scale(0.95) rotate(5deg); }
+}
+
+/* tired - 缓慢摇摆 */
+.anim-tired .pet-emoji {
+  animation: anim-tired 1.5s ease-in-out 2;
+}
+@keyframes anim-tired {
+  0%, 100% { transform: rotate(0deg); }
+  30%       { transform: rotate(-8deg) translateY(4rpx); }
+  70%       { transform: rotate(8deg) translateY(4rpx); }
+}
+
+/* startle - 惊吓后退 */
+.anim-startle .pet-emoji {
+  animation: anim-startle 0.4s ease-in-out 2;
+}
+@keyframes anim-startle {
+  0%, 100% { transform: translateX(0) scale(1); }
+  40%       { transform: translateX(-20rpx) scale(1.1); }
+  70%       { transform: translateX(8rpx) scale(0.95); }
+}
+
+/* confused - 歪头晃 */
+.anim-confused .pet-emoji {
+  animation: anim-confused 0.4s ease-in-out 3;
+}
+@keyframes anim-confused {
+  0%, 100% { transform: rotate(0deg); }
+  50%       { transform: rotate(-18deg); }
+}
+
+/* victory - 庆祝 */
+.anim-victory .pet-emoji {
+  animation: anim-victory 0.6s ease-in-out 3;
+}
+@keyframes anim-victory {
+  0%   { transform: scale(1) rotate(0deg); }
+  25%  { transform: scale(1.2) rotate(-8deg) translateY(-20rpx); }
+  50%  { transform: scale(1.15) rotate(8deg) translateY(-16rpx); }
+  75%  { transform: scale(1.1) rotate(-4deg) translateY(-8rpx); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+/* grooming - 摇头 */
+.anim-grooming .pet-emoji {
+  animation: anim-grooming 0.6s ease-in-out 3;
+}
+@keyframes anim-grooming {
+  0%, 100% { transform: rotate(0deg) translateY(0); }
+  25%       { transform: rotate(-10deg) translateY(-4rpx); }
+  75%       { transform: rotate(10deg) translateY(-4rpx); }
+}
+
+/* eating - 上下点头 */
+.anim-eating .pet-emoji {
+  animation: anim-eating 0.4s ease-in-out 4;
+}
+@keyframes anim-eating {
+  0%, 100% { transform: translateY(0); }
+  50%       { transform: translateY(12rpx); }
+}
+
+/* ---- 睡眠 ZZZ ---- */
+.sleep-zzz {
+  position: absolute;
+  top: -30rpx;
+  right: -20rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 4rpx;
+}
+
+.zzz {
+  color: #9BBBD4;
+  font-size: 24rpx;
+  font-weight: 700;
+  opacity: 0;
+  animation: float-zzz 2s ease-out infinite;
+}
+
+.zzz-2 { animation-delay: 0.6s; font-size: 30rpx; }
+.zzz-3 { animation-delay: 1.2s; font-size: 36rpx; }
+
+@keyframes float-zzz {
+  0%   { opacity: 0; transform: translateY(0) translateX(0); }
+  30%  { opacity: 1; }
+  100% { opacity: 0; transform: translateY(-40rpx) translateX(16rpx); }
+}
+
+/* ---- 情绪光环 ---- */
+.mood-halo {
+  position: absolute;
+  width: 220rpx;
+  height: 220rpx;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 215, 0, 0.25) 0%, transparent 70%);
+  animation: pulse-halo 2s ease-in-out infinite;
+}
+
+@keyframes pulse-halo {
+  0%, 100% { transform: scale(1); opacity: 0.6; }
+  50%       { transform: scale(1.15); opacity: 1; }
+}
+
+/* ---- 夜晚月亮 ---- */
+.night-moon {
+  position: absolute;
+  top: -40rpx;
+  right: -30rpx;
+  font-size: 40rpx;
+  animation: float-cloud 4s ease-in-out infinite;
+}
+
+/* ---- 对话气泡 ---- */
+.dialog-bubble {
+  position: absolute;
+  top: -80rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #fff;
+  border-radius: 24rpx;
+  padding: 16rpx 24rpx;
+  box-shadow: 0 6rpx 24rpx rgba(0,0,0,0.12);
+  border: 2rpx solid rgba(255, 159, 67, 0.2);
+  white-space: nowrap;
+  pointer-events: none;
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+.bubble-show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+.bubble-hide {
+  opacity: 0;
+  transform: translateX(-50%) translateY(10rpx);
+}
+
+.dialog-text {
+  font-size: 26rpx;
+  color: var(--color-text);
+  font-weight: 500;
+}
+
+.bubble-tail {
+  position: absolute;
+  bottom: -14rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 0;
+  height: 0;
+  border-left: 14rpx solid transparent;
+  border-right: 14rpx solid transparent;
+  border-top: 14rpx solid #fff;
+}
+
+/* ---- 特效层 ---- */
+.effect-layer {
+  position: absolute;
+  top: -60rpx;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  gap: 8rpx;
+  pointer-events: none;
+}
+
+.effect-hearts {
+  display: flex;
+  gap: 10rpx;
+  animation: float-effect 1.2s ease-out forwards;
+}
+
+.effect-glow {
+  display: flex;
+  gap: 10rpx;
+  animation: float-effect 1.2s ease-out forwards;
+}
+
+.effect-hearts text,
+.effect-glow text {
+  font-size: 40rpx;
+  animation: scatter 1.2s ease-out forwards;
+}
+
+.effect-hearts text:last-child,
+.effect-glow text:last-child {
+  animation-delay: 0.2s;
+}
+
+@keyframes float-effect {
+  0%   { opacity: 1; transform: translateY(0); }
+  100% { opacity: 0; transform: translateY(-60rpx); }
+}
+
+@keyframes scatter {
+  0%   { opacity: 1; transform: scale(0.5); }
+  50%  { opacity: 1; transform: scale(1.2); }
+  100% { opacity: 0; transform: scale(0.8) translateY(-40rpx); }
+}
+
+/* ---- 浮起数字 ---- */
+.float-number {
+  position: absolute;
+  top: 100rpx;
+  right: 60rpx;
+  font-size: 32rpx;
+  font-weight: 800;
+  color: #FF9F43;
+  text-shadow: 0 2rpx 8rpx rgba(255, 159, 67, 0.4);
+  pointer-events: none;
+  transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.float-show {
+  opacity: 1;
+  transform: translateY(0);
+  animation: float-num 1.5s ease-out forwards;
+}
+
+.float-hide {
+  opacity: 0;
+  transform: translateY(-30rpx);
+}
+
+@keyframes float-num {
+  0%   { opacity: 1; transform: translateY(0) scale(0.8); }
+  30%  { opacity: 1; transform: translateY(-20rpx) scale(1.1); }
+  100% { opacity: 0; transform: translateY(-60rpx) scale(0.9); }
+}
+
+/* ===== 四维数据条 ===== */
+.dims-section {
+  margin: 24rpx 24rpx 0;
+  background: #fff;
+  border-radius: 28rpx;
+  padding: 24rpx;
+  box-shadow: 0 4rpx 20rpx rgba(0,0,0,0.06);
+  border: 1rpx solid rgba(255, 159, 67, 0.1);
+}
+
+.dims-row {
+  display: flex;
+  gap: 20rpx;
+  margin-bottom: 20rpx;
+}
+
+.dims-row:last-child {
+  margin-bottom: 0;
+}
+
+.dim-item {
+  flex: 1;
+}
+
+.dim-header {
+  display: flex;
+  align-items: center;
+  gap: 8rpx;
+  margin-bottom: 10rpx;
+}
+
+.dim-icon {
+  font-size: 28rpx;
+}
+
+.dim-label {
+  font-size: 24rpx;
+  color: var(--color-gray);
+  flex: 1;
+}
+
+.dim-value {
+  font-size: 26rpx;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.dim-bar-bg {
+  height: 12rpx;
+  background: #F0F0F0;
+  border-radius: 12rpx;
+  overflow: hidden;
+}
+
+.dim-bar-fill {
+  height: 100%;
+  border-radius: 12rpx;
+  transition: width 0.5s ease;
+}
+
+/* 颜色状态 */
+.dim-bar-fill.dim-green  { background: linear-gradient(90deg, #52D681 0%, #27AE60 100%); }
+.dim-bar-fill.dim-yellow { background: linear-gradient(90deg, #FFD86B 0%, #F5A623 100%); }
+.dim-bar-fill.dim-red    { background: linear-gradient(90deg, #FF8A80 0%, #E53935 100%); }
+
+/* ===== 进化进度 ===== */
+.evolution-section {
+  margin: 20rpx 24rpx 0;
+  background: linear-gradient(135deg, #FFF5E6 0%, #FFE8C8 100%);
+  border-radius: 28rpx;
+  padding: 24rpx 28rpx;
+  border: 2rpx solid rgba(255, 159, 67, 0.2);
+  box-shadow: 0 4rpx 16rpx rgba(255, 159, 67, 0.08);
+}
+
+.evo-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16rpx;
+}
+
+.evo-title {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.evo-count {
+  font-size: 24rpx;
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.evo-bar-bg {
+  height: 16rpx;
+  background: rgba(255, 159, 67, 0.15);
+  border-radius: 16rpx;
+  overflow: hidden;
+  margin-bottom: 14rpx;
+}
+
+.evo-bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, #FFB366 0%, #FF9F43 100%);
+  border-radius: 16rpx;
+  transition: width 0.6s ease;
+}
+
+.evo-info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.evo-current {
+  font-size: 26rpx;
+  font-weight: 700;
+  color: var(--color-primary);
+}
+
+.evo-next {
+  font-size: 22rpx;
+  color: var(--color-gray);
+}
+
+/* ===== 互动提示 ===== */
+.hint-section {
+  margin: 20rpx 24rpx 0;
+}
+
+.hint-card {
+  background: linear-gradient(135deg, #FFFFFF 0%, #FFF9F0 100%);
+  border-radius: 20rpx;
+  padding: 20rpx 24rpx;
+  display: flex;
+  align-items: center;
+  gap: 12rpx;
+  border: 1rpx solid rgba(255, 159, 67, 0.12);
+  box-shadow: 0 2rpx 10rpx rgba(0,0,0,0.04);
+}
+
+.hint-icon {
+  font-size: 32rpx;
+}
+
+.hint-text {
+  font-size: 24rpx;
+  color: var(--color-gray);
+  line-height: 1.6;
+  flex: 1;
+}
+
+/* ===== 性格标签 ===== */
+.traits-section {
+  margin: 20rpx 24rpx 0;
+  padding: 24rpx;
+  background: #fff;
+  border-radius: 24rpx;
+  box-shadow: 0 4rpx 16rpx rgba(0,0,0,0.05);
+  border: 1rpx solid rgba(255, 159, 67, 0.08);
+}
+
+.traits-title {
+  display: block;
+  font-size: 26rpx;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: 16rpx;
+}
+
+.traits-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+}
+
+.trait-tag {
+  background: linear-gradient(135deg, #FFF5E6 0%, #FFE8C8 100%);
+  color: var(--color-primary);
+  font-size: 24rpx;
+  font-weight: 600;
+  padding: 10rpx 24rpx;
+  border-radius: 40rpx;
+  border: 2rpx solid rgba(255, 159, 67, 0.25);
+}
+
+/* ===== 升级弹窗 ===== */
+.levelup-mask {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.levelup-card {
+  background: #fff;
+  border-radius: 36rpx;
+  padding: 64rpx 48rpx;
+  margin: 0 48rpx;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16rpx;
+  box-shadow: 0 20rpx 60rpx rgba(0,0,0,0.2);
+  animation: pop-in 0.4s ease;
+}
+
+@keyframes pop-in {
+  0%   { transform: scale(0.7); opacity: 0; }
+  70%  { transform: scale(1.05); }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+.levelup-emoji {
+  font-size: 100rpx;
+  animation: bounce 0.8s ease-in-out 3;
+}
+
+.levelup-title {
+  font-size: 44rpx;
+  font-weight: 800;
+  color: var(--color-text);
+}
+
+.levelup-desc {
+  font-size: 28rpx;
+  color: var(--color-gray);
+  text-align: center;
+  line-height: 1.6;
+}
+
+.levelup-unlock {
+  font-size: 26rpx;
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.levelup-btn {
+  margin-top: 16rpx;
+  background: linear-gradient(135deg, #FFB366 0%, #FF9F43 100%);
+  color: #fff;
+  font-size: 30rpx;
+  font-weight: 700;
+  padding: 24rpx 80rpx;
+  border-radius: 50rpx;
+  box-shadow: 0 8rpx 24rpx rgba(255, 159, 67, 0.4);
+}

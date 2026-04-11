@@ -117,6 +117,53 @@
   border-radius: 20rpx;
 }
 
+/* ---- 宠物分身入口按钮 ---- */
+.avatar-entry-btn {
+  display: flex;
+  align-items: center;
+  gap: 20rpx;
+  margin-top: 24rpx;
+  background: linear-gradient(135deg, #FFF5E6 0%, #FFE8C8 100%);
+  border: 2rpx solid rgba(255, 159, 67, 0.3);
+  border-radius: 20rpx;
+  padding: 24rpx 28rpx;
+  transition: all 0.2s ease;
+}
+
+.avatar-entry-btn-hover {
+  opacity: 0.85;
+  transform: scale(0.98);
+}
+
+.avatar-entry-btn-icon {
+  font-size: 44rpx;
+  flex-shrink: 0;
+}
+
+.avatar-entry-btn-info {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 6rpx;
+}
+
+.avatar-entry-btn-title {
+  font-size: 28rpx;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.avatar-entry-btn-sub {
+  font-size: 22rpx;
+  color: var(--color-gray);
+}
+
+.avatar-entry-btn-arrow {
+  font-size: 32rpx;
+  color: var(--color-primary);
+  font-weight: 700;
+}
+
 .edit-link {
   font-size: 26rpx;
   color: var(--color-primary);

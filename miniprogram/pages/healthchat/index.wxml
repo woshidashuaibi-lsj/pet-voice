@@ -18,47 +18,50 @@
 
   <!-- 正常聊天区域（开关开启时显示） -->
   <block wx:if="{{chatEnabled === true}}">
-    <!-- 聊天消息列表 -->
-    <scroll-view scroll-y scroll-into-view="{{scrollToId}}" class="chat-list" style="height: calc(100vh - {{statusBarHeight + navBarHeight}}px - 120rpx - {{keyboardHeight}}px); margin-top: {{statusBarHeight + navBarHeight}}px;">
-      <!-- 欢迎占位 -->
-      <view class="chat-welcome" wx:if="{{messages.length === 0}}">
-        <text class="chat-welcome-icon">🩺</text>
-        <text class="chat-welcome-title">Hi，我是你的宠物健康顾问</text>
-        <text class="chat-welcome-sub">你可以问我关于{{petName ? petName : '宠物'}}的健康、饮食、行为等问题</text>
-        <!-- 快捷问题 -->
-        <view class="quick-questions">
-          <view wx:for="{{quickQuestions}}" wx:key="*this" class="quick-btn" bindtap="sendQuick" data-q="{{item}}">
-            {{item}}
+    <!-- 聊天主体区域（flex 布局，占满 top-bar 以下空间） -->
+    <view class="chat-body" style="margin-top: {{statusBarHeight + navBarHeight}}px; padding-bottom: {{keyboardHeight}}px;">
+      <!-- 聊天消息列表 -->
+      <scroll-view scroll-y scroll-into-view="{{scrollToId}}" class="chat-list">
+        <!-- 欢迎占位 -->
+        <view class="chat-welcome" wx:if="{{messages.length === 0}}">
+          <text class="chat-welcome-icon">🩺</text>
+          <text class="chat-welcome-title">Hi，我是你的宠物健康顾问</text>
+          <text class="chat-welcome-sub">你可以问我关于{{petName ? petName : '宠物'}}的健康、饮食、行为等问题</text>
+          <!-- 快捷问题 -->
+          <view class="quick-questions">
+            <view wx:for="{{quickQuestions}}" wx:key="*this" class="quick-btn" bindtap="sendQuick" data-q="{{item}}">
+              {{item}}
+            </view>
           </view>
         </view>
-      </view>
-      <!-- 消息气泡 -->
-      <view wx:for="{{messages}}" wx:key="id" id="msg-{{item.id}}" class="msg-row {{item.role === 'user' ? 'msg-right' : 'msg-left'}}">
-        <!-- 顾问头像 -->
-        <view class="msg-avatar" wx:if="{{item.role === 'assistant'}}">🩺</view>
-        <view class="msg-bubble {{item.role === 'user' ? 'bubble-user' : 'bubble-ai'}} {{item.loading ? 'bubble-loading' : ''}}">
-          <!-- 加载动画 -->
-          <view class="loading-dots" wx:if="{{item.loading}}">
-            <view class="dot dot1"></view>
-            <view class="dot dot2"></view>
-            <view class="dot dot3"></view>
+        <!-- 消息气泡 -->
+        <view wx:for="{{messages}}" wx:key="id" id="msg-{{item.id}}" class="msg-row {{item.role === 'user' ? 'msg-right' : 'msg-left'}}">
+          <!-- 顾问头像 -->
+          <view class="msg-avatar" wx:if="{{item.role === 'assistant'}}">🩺</view>
+          <view class="msg-bubble {{item.role === 'user' ? 'bubble-user' : 'bubble-ai'}} {{item.loading ? 'bubble-loading' : ''}}">
+            <!-- 加载动画 -->
+            <view class="loading-dots" wx:if="{{item.loading}}">
+              <view class="dot dot1"></view>
+              <view class="dot dot2"></view>
+              <view class="dot dot3"></view>
+            </view>
+            <!-- 正常消息 -->
+            <text wx:else class="msg-text">{{item.content}}</text>
           </view>
-          <!-- 正常消息 -->
-          <text wx:else class="msg-text">{{item.content}}</text>
+          <!-- 用户头像 -->
+          <view class="msg-avatar user-avatar" wx:if="{{item.role === 'user'}}">
+            {{petType === 'cat' ? '🐱' : '🐶'}}
+          </view>
         </view>
-        <!-- 用户头像 -->
-        <view class="msg-avatar user-avatar" wx:if="{{item.role === 'user'}}">
-          {{petType === 'cat' ? '🐱' : '🐶'}}
-        </view>
-      </view>
-      <!-- 底部锚点（用于自动滚动到底部） -->
-      <view id="chat-bottom" style="height:32rpx;"></view>
-    </scroll-view>
-    <!-- 底部输入栏 -->
-    <view class="input-bar" style="padding-bottom: {{keyboardHeight > 0 ? 0 : 'env(safe-area-inset-bottom)'}};">
+        <!-- 底部锚点（用于自动滚动到底部） -->
+        <view id="chat-bottom" style="height:32rpx;"></view>
+      </scroll-view>
+      <!-- 底部输入栏 -->
+      <view class="input-bar" style="padding-bottom: {{keyboardHeight > 0 ? 0 : 'env(safe-area-inset-bottom)'}};">
       <textarea class="input-box" value="{{inputText}}" bindinput="onInput" bindfocus="onFocus" bindblur="onBlur" placeholder="描述宠物症状或提问…" placeholder-class="input-placeholder" maxlength="500" auto-height adjust-position="{{false}}" />
       <view class="send-btn {{(inputText.trim() && !isLoading) ? 'send-active' : ''}}" bindtap="sendMessage">
         <text class="send-icon">↑</text>
+      </view>
       </view>
     </view>
   </block>

@@ -183,130 +183,38 @@
   font-weight: 500;
 }
 
-.welcome-deco {
-  position: absolute;
-  top: -8rpx;
-  right: 20rpx;
-  font-size: 48rpx;
-  animation: float-heart 2s ease-in-out infinite;
+.welcome-card-hover {
+  opacity: 0.88;
+  transform: translateY(-2rpx);
+}
+
+/* 分身入口徽章 */
+.avatar-entry-badge {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4rpx;
+  background: linear-gradient(135deg, #FF9F43 0%, #FF7F30 100%);
+  border-radius: 20rpx;
+  padding: 12rpx 18rpx;
+  flex-shrink: 0;
+  box-shadow: 0 4rpx 12rpx rgba(255, 159, 67, 0.35);
+}
+
+.avatar-entry-icon {
+  font-size: 28rpx;
+  line-height: 1;
+}
+
+.avatar-entry-text {
+  font-size: 20rpx;
+  color: #fff;
+  font-weight: 700;
 }
 
 @keyframes float-heart {
   0%, 100% { transform: translateY(0) scale(1); }
   50% { transform: translateY(-8rpx) scale(1.1); }
-}
-
-/* ---- 录音区域 ---- */
-.record-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 64rpx 32rpx 48rpx;
-  position: relative;
-  z-index: 1;
-}
-
-.record-btn {
-  width: 320rpx;
-  height: 320rpx;
-  border-radius: 50%;
-  background: linear-gradient(145deg, #FFB366 0%, #FF9F43 50%, #FF7F30 100%);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  box-shadow:
-    0 20rpx 60rpx rgba(255, 159, 67, 0.4),
-    0 0 0 8rpx rgba(255, 255, 255, 0.3),
-    inset 0 -8rpx 20rpx rgba(0, 0, 0, 0.1);
-  transition: all 0.2s ease;
-  position: relative;
-  z-index: 2;
-  border: 4rpx solid rgba(255, 255, 255, 0.4);
-}
-
-.record-btn:active {
-  transform: scale(0.95);
-}
-
-.record-btn.recording {
-  transform: scale(1.08);
-  box-shadow:
-    0 28rpx 80rpx rgba(255, 159, 67, 0.5),
-    0 0 0 12rpx rgba(255, 255, 255, 0.4),
-    inset 0 -8rpx 20rpx rgba(0, 0, 0, 0.1);
-  animation: pulse-record 0.8s ease-in-out infinite;
-}
-
-@keyframes pulse-record {
-  0%, 100% { transform: scale(1.08); }
-  50% { transform: scale(1.12); }
-}
-
-.record-icon {
-  font-size: 96rpx;
-  margin-bottom: 12rpx;
-  line-height: 1;
-  filter: drop-shadow(0 4rpx 8rpx rgba(0, 0, 0, 0.2));
-}
-
-.record-text {
-  color: #fff;
-  font-size: 32rpx;
-  font-weight: 700;
-  text-shadow: 0 2rpx 4rpx rgba(0, 0, 0, 0.2);
-}
-
-/* 录音中波纹 */
-.ripple-wrap {
-  position: absolute;
-  top: 64rpx;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 320rpx;
-  height: 320rpx;
-  z-index: 1;
-}
-
-.ripple {
-  position: absolute;
-  border-radius: 50%;
-  border: 4rpx solid rgba(255, 159, 67, 0.5);
-  animation: ripple-anim 1.8s ease-out infinite;
-}
-
-.ripple-1 {
-  width: 380rpx;
-  height: 380rpx;
-  animation-delay: 0s;
-}
-
-.ripple-2 {
-  width: 460rpx;
-  height: 460rpx;
-  animation-delay: 0.6s;
-}
-
-.ripple-3 {
-  width: 540rpx;
-  height: 540rpx;
-  animation-delay: 1.2s;
-}
-
-@keyframes ripple-anim {
-  0%   { opacity: 1; transform: scale(0.85); }
-  100% { opacity: 0; transform: scale(1.15); }
-}
-
-.record-hint {
-  margin-top: 32rpx;
-  color: var(--color-gray);
-  font-size: 26rpx;
-  background: rgba(255, 255, 255, 0.6);
-  padding: 12rpx 24rpx;
-  border-radius: 40rpx;
-  backdrop-filter: blur(4rpx);
 }
 
 /* ---- 功能入口区域 ---- */

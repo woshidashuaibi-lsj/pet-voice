@@ -24,38 +24,26 @@
 
   <!-- 主内容区 -->
   <scroll-view scroll-y class="main-scroll">
-    <!-- 宠物欢迎语 -->
-    <view class="welcome-card" wx:if="{{petName}}">
+    <!-- 宠物欢迎语（点击跳转分身页） -->
+    <navigator url="/pages/avatar/index" class="welcome-card" wx:if="{{petName}}" hover-class="welcome-card-hover">
       <view class="welcome-avatar-wrap">
         <text class="welcome-avatar">{{petType === 'cat' ? '🐱' : '🐕'}}</text>
       </view>
       <view class="welcome-info">
         <text class="welcome-name">{{petName}}</text>
-        <text class="welcome-sub">在等你翻译 TA 说的话 ✨</text>
+        <text class="welcome-sub">点我看看分身吧 ✨</text>
       </view>
-      <text class="welcome-deco">💕</text>
-    </view>
+      <view class="avatar-entry-badge">
+        <text class="avatar-entry-icon">✨</text>
+        <text class="avatar-entry-text">分身</text>
+      </view>
+    </navigator>
 
     <!-- 无宠物时的引导提示 -->
     <view class="tip-card" wx:if="{{!petName}}" bindtap="goProfile">
       <text class="tip-icon">🐾</text>
       <text class="tip-text">先填写宠物档案，翻译更准确</text>
       <text class="tip-arrow">→</text>
-    </view>
-
-    <!-- 录音核心区域 -->
-    <view class="record-container">
-      <view class="record-btn {{isRecording ? 'recording' : ''}}" bindtouchstart="onRecordStart" bindtouchend="onRecordEnd" bindtouchcancel="onRecordEnd">
-        <text class="record-icon">🎤</text>
-        <text class="record-text">{{isRecording ? duration + 's' : '按住录音'}}</text>
-      </view>
-      <!-- 录音中波纹动画 -->
-      <view class="ripple-wrap" wx:if="{{isRecording}}">
-        <view class="ripple ripple-1"></view>
-        <view class="ripple ripple-2"></view>
-        <view class="ripple ripple-3"></view>
-      </view>
-      <text class="record-hint">录制 3-15 秒宠物叫声</text>
     </view>
 
     <!-- 功能入口卡片 -->
